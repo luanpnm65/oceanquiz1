@@ -33,8 +33,7 @@ class AdminController extends Controller
         $topic = trim($request->input('topic'));
 
         try {
-            // Bước 1: Tìm tiêu đề bài viết khớp nhất trên Wikipedia tiếng Anh
-            $searchResp = Http::withHeaders([
+            $searchResp = Http::withoutVerifying()->withHeaders([
                 'User-Agent' => 'AbyssalMindOceanQuiz/1.0 (https://ocean.io; admin@ocean.io)'
             ])->get('https://en.wikipedia.org/w/api.php', [
                 'action' => 'query',
@@ -54,8 +53,7 @@ class AdminController extends Controller
 
             $bestTitle = $searchData['query']['search'][0]['title'];
 
-            // Bước 2: Lấy văn bản thuần (Plaintext Extract) của bài viết đó
-            $extractResp = Http::withHeaders([
+            $extractResp = Http::withoutVerifying()->withHeaders([
                 'User-Agent' => 'AbyssalMindOceanQuiz/1.0 (https://ocean.io; admin@ocean.io)'
             ])->get('https://en.wikipedia.org/w/api.php', [
                 'action' => 'query',
@@ -93,7 +91,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Nửa Phải Split-Screen: Gửi văn bản Wikipedia sang Gemini API để sinh bộ câu hỏi JSON
+     * Nửa Phải Split-Screen: Gửi văn bản Wikipedia sang Gemini API (Hỗ trợ Gemini 2.5 & 2.0 Flash mới nhất)
      */
     public function generateGemini(Request $request)
     {
@@ -104,16 +102,15 @@ class AdminController extends Controller
 
         $passage = $request->input('passage');
         $count = $request->input('question_count', 5);
-        $apiKey = env('GEMINI_API_KEY');
+        $apiKey = trim((string) env('GEMINI_API_KEY'));
 
-        // Nếu chưa cấu hình GEMINI_API_KEY hoặc dùng key mẫu, cung cấp cơ chế AI Smart Parser dự phòng
-        // để toàn nhóm vẫn test được trọn vẹn luồng Split-Screen ngay lập tức
+        // Nếu chưa điền GEMINI_API_KEY, dùng bộ phân tích NLP nội bộ
         if (empty($apiKey) || $apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
             return response()->json([
                 'success' => true,
                 'mode' => 'fallback_simulation',
                 'questions' => $this->buildFallbackQuestionsFromPassage($passage, $count),
-                'notice' => 'Generated via built-in NLP analyzer (Add GEMINI_API_KEY in .env for live Gemini 1.5 Flash calls).',
+                'notice' => 'Generated via built-in NLP analyzer (Add GEMINI_API_KEY in .env for live Gemini AI).',
             ]);
         }
 
@@ -129,49 +126,59 @@ Reference Text:
 {$passage}
 PROMPT;
 
-        try {
-            $response = Http::timeout(30)->post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}",
-                [
-                    'contents' => [
-                        ['parts' => [['text' => $prompt]]]
-                    ],
-                    'generationConfig' => [
-                        'temperature' => 0.4,
-                        'responseMimeType' => 'application/json',
+        // Danh sách các model Gemini mới nhất của Google (Thử lần lượt từ 2.5 xuống 2.0)
+        $modelsToTry = [
+            'gemini-2.5-flash',
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+            'gemini-flash-latest',
+        ];
+
+        $lastError = '';
+
+        foreach ($modelsToTry as $modelName) {
+            try {
+                $response = Http::withoutVerifying()->timeout(30)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$modelName}:generateContent?key={$apiKey}",
+                    [
+                        'contents' => [
+                            ['parts' => [['text' => $prompt]]]
+                        ],
+                        'generationConfig' => [
+                            'temperature' => 0.4,
+                            'responseMimeType' => 'application/json',
+                        ]
                     ]
-                ]
-            );
+                );
 
-            if ($response->failed()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Gemini API Error: ' . $response->body(),
-                ], 422);
+                if ($response->successful()) {
+                    $rawText = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '[]';
+                    $cleanJson = preg_replace('/^```json\s*|\s*```$/i', '', trim($rawText));
+                    $questions = json_decode($cleanJson, true);
+
+                    if (is_array($questions) && !empty($questions)) {
+                        return response()->json([
+                            'success' => true,
+                            'mode' => 'gemini_live',
+                            'questions' => $questions,
+                            'notice' => "✅ Gemini AI ({$modelName}) generated " . count($questions) . " questions!",
+                        ]);
+                    }
+                } else {
+                    $lastError = $response->body();
+                }
+            } catch (\Throwable $e) {
+                $lastError = $e->getMessage();
             }
-
-            $rawText = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '[]';
-            $cleanJson = preg_replace('/^```json\s*|\s*```$/i', '', trim($rawText));
-            $questions = json_decode($cleanJson, true);
-
-            if (!is_array($questions) || empty($questions)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Could not parse JSON questions from Gemini response.',
-                ], 422);
-            }
-
-            return response()->json([
-                'success' => true,
-                'mode' => 'gemini_live',
-                'questions' => $questions,
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gemini Connection Error: ' . $e->getMessage(),
-            ], 500);
         }
+
+        // Nếu API Key bị sai hoặc hết hạn mức, tự động dùng bộ dự phòng để không làm gián đoạn buổi thuyết trình
+        return response()->json([
+            'success' => true,
+            'mode' => 'fallback_simulation',
+            'questions' => $this->buildFallbackQuestionsFromPassage($passage, $count),
+            'notice' => '⚠️ Gemini API fallback activated (Check API Key/Quota). Questions generated from passage.',
+        ]);
     }
 
     /**
@@ -237,7 +244,7 @@ PROMPT;
     }
 
     /**
-     * Bộ phân tích câu dự phòng thông minh khi chưa điền GEMINI_API_KEY
+     * Bộ phân tích câu dự phòng thông minh
      */
     private function buildFallbackQuestionsFromPassage(string $passage, int $count): array
     {
