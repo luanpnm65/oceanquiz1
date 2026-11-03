@@ -13,7 +13,8 @@ class HomeController extends Controller
 
     public function leaderboard()
     {
-        $leaders = User::orderByDesc('total_score')
+        $leaders = User::where('total_score', '>', 0)
+            ->orderByDesc('total_score')
             ->orderByDesc('quizzes_completed')
             ->take(50)
             ->get();

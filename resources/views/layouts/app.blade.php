@@ -4,56 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'AbyssalMind - Đấu Trường Kiến Thức Đại Dương')</title>
-    <link rel="stylesheet" href="{{ asset('css/ocean-app.css') }}">
+    <meta name="description" content="OceanQuiz — đọc tư liệu ngắn về đại dương, làm bài trắc nghiệm có tính giờ và theo dõi điểm trên bảng xếp hạng.">
+    <title>@yield('title', 'OceanQuiz — Học về đại dương qua câu hỏi trắc nghiệm')</title>
+    <link rel="preload" as="font" type="font/woff2" href="{{ asset('fonts/be-vietnam-pro-547cf24c.woff2') }}" crossorigin>
+    <link rel="stylesheet" href="{{ asset('fonts/be-vietnam-pro.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+    @stack('styles')
+    @stack('head')
 </head>
-<body>
-    <nav class="ocean-nav">
-        <a href="{{ route('welcome') }}" class="brand-logo">
-            <span>🌊</span>
-            <span>ABYSSALMIND</span>
-        </a>
+<body class="@yield('body_class')">
+    <a class="skip-link" href="#main">Bỏ qua điều hướng</a>
 
-        <div class="nav-links">
-            <a href="{{ route('welcome') }}" class="nav-link {{ request()->routeIs('welcome') ? 'active' : '' }}">Độ Sâu Đại Dương</a>
-            <a href="{{ route('leaderboard') }}" class="nav-link {{ request()->routeIs('leaderboard') ? 'active' : '' }}">🏆 Bảng Xếp Hạng</a>
+    <header class="site-header">
+        <nav class="nav container" aria-label="Điều hướng chính">
+            <a class="brand" href="{{ route('welcome') }}">Ocean<span class="brand__quiz">Quiz</span></a>
 
-            @auth
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Bảng Điều Khiển</a>
-                @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" style="color:#fbbf24;">⚡ Trung Tâm AI (Admin)</a>
+            <div class="nav__links">
+                <a class="nav__link {{ request()->routeIs('welcome') ? 'is-active' : '' }}" href="{{ route('welcome') }}">Trang chủ</a>
+                <a class="nav__link {{ request()->routeIs('leaderboard') ? 'is-active' : '' }}" href="{{ route('leaderboard') }}">Bảng xếp hạng</a>
+
+                @auth
+                    <a class="nav__link {{ request()->routeIs('dashboard', 'quiz.*') ? 'is-active' : '' }}" href="{{ route('dashboard') }}">Bảng điều khiển</a>
+                    @if (auth()->user()->isAdmin())
+                        <a class="nav__link {{ request()->routeIs('admin.*') ? 'is-active' : '' }}" href="{{ route('admin.index') }}">Quản trị</a>
+                    @endif
+                @endauth
+
+                <span class="nav__divider" aria-hidden="true"></span>
+
+                <div class="nav__user-actions">
+                    @auth
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn--ghost btn--sm">Đăng xuất</button>
+                        </form>
+                    @else
+                        <a class="nav__link {{ request()->routeIs('login') ? 'is-active' : '' }}" href="{{ route('login') }}">Đăng nhập</a>
+                        <a class="btn btn--primary btn--sm" href="{{ route('register') }}">Đăng ký</a>
+                    @endauth
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main">
+        @if (session('success') || session('error') || $errors->any())
+            <div class="container page-flash" aria-live="polite">
+                @if (session('success'))
+                    <div class="alert alert--success">{{ session('success') }}</div>
                 @endif
-                <form action="{{ route('logout') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size:0.85rem;">Đăng xuất</button>
-                </form>
-            @else
-                <a href="{{ route('login') }}" class="nav-link">Đăng nhập</a>
-                <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size:0.88rem;">Đăng ký</a>
-            @endauth
-        </div>
-    </nav>
-
-    @if(session('success'))
-        <div class="container" style="padding-bottom: 0;">
-            <div style="background: rgba(34, 197, 94, 0.18); border: 1px solid #22c55e; color: #bbf7d0; padding: 0.9rem 1.25rem; border-radius: 12px;">
-                ✅ {{ session('success') }}
+                @if (session('error'))
+                    <div class="alert alert--error">{{ session('error') }}</div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert--error">
+                        <strong>Vui lòng kiểm tra lại:</strong>
+                        <ul class="mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
-        </div>
-    @endif
+        @endif
 
-    @if(session('error'))
-        <div class="container" style="padding-bottom: 0;">
-            <div style="background: rgba(239, 68, 68, 0.18); border: 1px solid #ef4444; color: #fecaca; padding: 0.9rem 1.25rem; border-radius: 12px;">
-                ⚠️ {{ session('error') }}
-            </div>
-        </div>
-    @endif
-
-    <main>
         @yield('content')
     </main>
 
-    @stack('scripts')
+    @hasSection('footer')
+        <footer class="site-footer">
+            <div class="container site-footer__inner">
+                @yield('footer')
+            </div>
+        </footer>
+    @endif
 </body>
 </html>

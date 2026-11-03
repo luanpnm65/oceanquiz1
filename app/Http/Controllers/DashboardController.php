@@ -23,12 +23,15 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Tổng số lượt đã làm (hiển thị ở tiêu đề lịch sử)
+        $totalAttempts = QuizAttempt::where('user_id', $user->id)->count();
+
         // Đếm tổng số câu trả lời sai trong 5 lần làm bài gần nhất
         $mistakeCount = 0;
         foreach ($recentAttempts as $attempt) {
             $mistakeCount += $attempt->answers->where('is_correct', false)->count();
         }
 
-        return view('dashboard.index', compact('user', 'globalRank', 'recentAttempts', 'mistakeCount'));
+        return view('dashboard.index', compact('user', 'globalRank', 'recentAttempts', 'mistakeCount', 'totalAttempts'));
     }
 }
