@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +10,8 @@ class QuizSet extends Model
     use HasFactory;
 
     protected $fillable = [
+        'article_id',
+        'source',
         'title',
         'topic',
         'ocean_zone',
@@ -21,6 +24,11 @@ class QuizSet extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function article()
+    {
+        return $this->belongsTo(Article::class);
+    }
 
     public function questions()
     {

@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use App\Models\QuizSet;
+use App\Models\Article;
 use App\Models\Question;
+use App\Models\QuizSet;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -91,7 +92,7 @@ class DatabaseSeeder extends Seeder
                     'Vì dưới 8.400m hoàn toàn không còn oxy hòa tan',
                     'Vì phân tử TMAO trong tế bào không còn đủ khả năng bảo vệ protein trước áp suất quá lớn',
                     'Vì nước biển đặc cứng lại không thể bơi',
-                    'Vì nhiệt độ nước sôi trên 100 °C ở khắp mọi nơi'
+                    'Vì nhiệt độ nước sôi trên 100 °C ở khắp mọi nơi',
                 ],
                 'correct_option_index' => 1,
                 'explanation' => 'Cá sử dụng hợp chất TMAO để giữ cấu trúc protein không bị biến dạng dưới áp suất cao, nhưng giới hạn sinh học của TMAO dừng lại ở khoảng 8.400 mét.',
@@ -121,7 +122,7 @@ class DatabaseSeeder extends Seeder
                     'Diệp lục (Chlorophyll) và Carotene',
                     'Luciferin và enzyme Luciferase',
                     'Hemoglobin và Melanin',
-                    'Collagen và Keratin'
+                    'Collagen và Keratin',
                 ],
                 'correct_option_index' => 1,
                 'explanation' => 'Phân tử Luciferin bị oxy hóa dưới sự xúc tác của enzyme Luciferase để giải phóng ánh sáng.',
@@ -133,7 +134,7 @@ class DatabaseSeeder extends Seeder
                     'Vì bước sóng xanh lam - xanh lục truyền đi xa nhất trong nước biển',
                     'Vì sinh vật biển không có gen tạo màu khác',
                     'Vì ánh sáng xanh giúp làm ấm vùng nước đóng băng',
-                    'Vì kẻ săn mồi bị mù hoàn toàn với ánh sáng xanh'
+                    'Vì kẻ săn mồi bị mù hoàn toàn với ánh sáng xanh',
                 ],
                 'correct_option_index' => 0,
                 'explanation' => 'Nước biển hấp thụ rất nhanh các bước sóng dài (như màu đỏ, cam), trong khi bước sóng xanh lam truyền đi xa nhất.',
@@ -145,7 +146,7 @@ class DatabaseSeeder extends Seeder
                     'Vì nó chỉ hoạt động ở vùng nước dưới 4 °C',
                     'Vì chưa tới 20% năng lượng ánh sáng phát ra chuyển hóa thành nhiệt',
                     'Vì nó làm đóng băng các phân tử nước xung quanh',
-                    'Vì nó cần tinh thể băng để phản chiếu'
+                    'Vì nó cần tinh thể băng để phản chiếu',
                 ],
                 'correct_option_index' => 1,
                 'explanation' => 'Hiệu suất phát sáng sinh học cực cao, dưới 20% năng lượng bị thất thoát dưới dạng nhiệt năng.',
@@ -157,7 +158,7 @@ class DatabaseSeeder extends Seeder
                     'Cá Voi Xanh',
                     'Cá Rồng Đèn Đỏ (Malacosteus / Stoplight Loosejaw)',
                     'Cá Hề',
-                    'Sứa Bờm Sư Tử'
+                    'Sứa Bờm Sư Tử',
                 ],
                 'correct_option_index' => 1,
                 'explanation' => 'Cá rồng chi Malacosteus phát ra ánh sáng đỏ để nhìn rõ con mồi trong khi các loài sinh vật biển sâu khác không nhìn thấy ánh sáng đỏ.',
@@ -174,6 +175,11 @@ class DatabaseSeeder extends Seeder
 
         foreach ($questionsSet2 as $q) {
             Question::create(array_merge($q, ['quiz_set_id' => $set2->id]));
+        }
+
+        foreach ([$set1, $set2] as $set) {
+            $article = Article::create(['title' => $set->title, 'content' => $set->reading_passage, 'source_url' => $set->source_url]);
+            $set->update(['article_id' => $article->id]);
         }
     }
 }

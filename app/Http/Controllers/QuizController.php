@@ -1,15 +1,17 @@
 <?php
+
 // [Thành viên 2 - Contributor A] app/Http/Controllers/QuizController.php
 
 namespace App\Http\Controllers;
 
-use App\Models\QuizSet;
 use App\Models\Question;
 use App\Models\QuizAttempt;
 use App\Models\QuizAttemptAnswer;
+use App\Models\QuizSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class QuizController extends Controller
 {
@@ -24,7 +26,7 @@ class QuizController extends Controller
             ->inRandomOrder()
             ->first();
 
-        if (!$quizSet) {
+        if (! $quizSet) {
             return redirect()->route('dashboard')
                 ->with('error', 'No active quiz sets found in the sonar database.');
         }
@@ -38,7 +40,7 @@ class QuizController extends Controller
     public function submit(Request $request)
     {
         $validated = $request->validate([
-            'quiz_set_id' => ['required', 'exists:quiz_sets,id'],
+            'quiz_set_id' => ['required', Rule::exists('quiz_sets', 'id')->where('is_active', true)],
             'duration_seconds' => ['required', 'integer', 'min:1'],
             'answers' => ['required', 'array'],
             'answers.*.question_id' => ['required', 'exists:questions,id'],
@@ -109,9 +111,10 @@ class QuizController extends Controller
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to save attempt: ' . $e->getMessage(),
+                'message' => 'Failed to save attempt: '.$e->getMessage(),
             ], 500);
         }
     }
