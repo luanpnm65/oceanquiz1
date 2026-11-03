@@ -23,11 +23,11 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended(route('dashboard'))
-                ->with('success', 'Welcome aboard submarine explorer ' . Auth::user()->name . '!');
+                ->with('success', 'Đăng nhập thành công. Chào mừng ' . Auth::user()->name . '!');
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our sonar records.',
+            'email' => 'Email hoặc mật khẩu không đúng.',
         ])->onlyInput('email');
     }
 
@@ -56,7 +56,7 @@ class AuthController extends Controller
         Auth::login($user);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Diver license issued! Ready for your first deep-sea dive.');
+            ->with('success', 'Tạo tài khoản thành công. Sẵn sàng cho lượt làm bài đầu tiên!');
     }
 
     public function logout(Request $request)

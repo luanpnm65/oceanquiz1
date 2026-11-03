@@ -28,9 +28,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
-// --- KHU VỰC CỦA THÀNH VIÊN 2 (CONTRIBUTOR A): QUIZ WORKFLOW, KAHOOT UI & REVIEW MISTAKES ---
+// --- KHU VỰC CỦA THÀNH VIÊN 2 (CONTRIBUTOR A): QUIZ WORKFLOW THUẦN PHP (KHÔNG JS) ---
 Route::middleware('auth')->prefix('quiz')->name('quiz.')->group(function () {
+    // Bước 0: bốc ngẫu nhiên một bộ đề đã xuất bản và mở trang đọc tư liệu.
     Route::get('/play', [QuizController::class, 'play'])->name('play');
+
+    // Bước 1: đọc tư liệu. Nút "Bắt đầu làm bài" và thẻ meta refresh gọi route start.
+    Route::get('/{quizSet}/start', [QuizController::class, 'start'])->name('start');
+
+    // Bước 2: từng câu hỏi, mỗi câu một trang do server tính giờ.
+    Route::get('/attempt/{attempt}', [QuizController::class, 'question'])->name('question');
+    Route::post('/attempt/{attempt}/answer', [QuizController::class, 'answer'])->name('answer');
+
+    // Kết quả từng câu (đúng/sai/giải thích) và kết quả cả bài.
+    Route::get('/attempt/{attempt}/answer/{answer}', [QuizController::class, 'answerResult'])->name('answer-result');
+    Route::get('/attempt/{attempt}/result', [QuizController::class, 'result'])->name('result');
+
+    // Luồng JSON cũ giữ nguyên để không phá phần backend đã nộp trước đó.
     Route::post('/submit', [QuizController::class, 'submit'])->name('submit');
     Route::get('/mistakes', [QuizController::class, 'mistakes'])->name('mistakes');
 });

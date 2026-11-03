@@ -1,254 +1,229 @@
 @extends('layouts.app')
 
-@section('title', 'Khám Phá Độ Sâu Đại Dương | AbyssalMind')
+@section('title', 'OceanQuiz — Học về đại dương qua câu hỏi trắc nghiệm')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+@endpush
 
 @section('content')
-<div class="ocean-scroll-wrapper" id="oceanWrapper">
+<div class="landing">
 
-    <!-- Thanh đo độ sâu cố định bên trái -->
-    <aside class="depth-sidebar">
-        <div class="depth-readout-box">
-            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Độ Sâu Sonar Hiện Tại</div>
-            <div class="depth-meter-number" id="currentDepthDisplay">0m</div>
-            <div class="depth-zone-badge" id="currentZoneName">Tầng Ánh Sáng</div>
+    {{-- Thước độ sâu cố định bên phải; chấm trắng chạy theo cuộn bằng CSS scroll-timeline --}}
+    <aside class="depth-ruler" aria-hidden="true">
+        <div class="depth-ruler__track">
+            <span class="depth-ruler__line"></span>
+            <span class="depth-ruler__dot"></span>
+            <ul class="depth-ruler__marks">
+                <li class="depth-ruler__mark"><span class="depth-ruler__tick"></span><span class="depth-ruler__label">0 m</span></li>
+                <li class="depth-ruler__mark"><span class="depth-ruler__tick"></span><span class="depth-ruler__label">200 m</span></li>
+                <li class="depth-ruler__mark"><span class="depth-ruler__tick"></span><span class="depth-ruler__label">1.000 m</span></li>
+                <li class="depth-ruler__mark"><span class="depth-ruler__tick"></span><span class="depth-ruler__label">4.000 m</span></li>
+                <li class="depth-ruler__mark"><span class="depth-ruler__tick"></span><span class="depth-ruler__label">6.000 m</span></li>
+            </ul>
         </div>
-
-        <ul class="depth-scale-list">
-            <li class="depth-scale-item active" data-target="zone-0" onclick="scrollToZone('zone-0')">
-                <strong>0m</strong> — Tầng Ánh Sáng
-            </li>
-            <li class="depth-scale-item" data-target="zone-200" onclick="scrollToZone('zone-200')">
-                <strong>200m</strong> — Tầng Chạng Vạng
-            </li>
-            <li class="depth-scale-item" data-target="zone-1000" onclick="scrollToZone('zone-1000')">
-                <strong>1,000m</strong> — Tầng Nửa Đêm
-            </li>
-            <li class="depth-scale-item" data-target="zone-4000" onclick="scrollToZone('zone-4000')">
-                <strong>4,000m</strong> — Tầng Đáy Thẳm
-            </li>
-            <li class="depth-scale-item" data-target="zone-6000" onclick="scrollToZone('zone-6000')">
-                <strong>6,000m+</strong> — Rãnh Mariana
-            </li>
-        </ul>
     </aside>
 
-    <!-- TẦNG 1: 0m TẦNG ÁNH SÁNG -->
-    <section class="ocean-zone-section" id="zone-0" data-depth="0" data-zone="Tầng Ánh Sáng (0m - 200m)">
-        <div class="zone-card">
-            <div class="zone-header">
-                <span class="zone-depth-pill">ĐỘ SÂU: 0m – 200m</span>
-                <span style="color: #bae6fd; font-weight: 600;">☀️ Quang Hợp & Rạn San Hô</span>
-            </div>
-            <h1 style="font-size: 2.3rem; margin-bottom: 1rem;">Tầng Ánh Sáng (Epipelagic Zone)</h1>
-            <p style="color: #e0f2fe; font-size: 1.05rem;">
-                Chào mừng bạn đến với tầng mặt của đại dương — nơi ánh sáng mặt trời chiếu rọi rực rỡ, thúc đẩy quá trình quang hợp của thực vật phù du (nguồn tạo ra hơn 50% lượng oxy cho Trái Đất và nuôi sống 90% sinh vật biển).
+    {{-- Khung 01: hero mặt nước --}}
+    <section class="hero" aria-labelledby="hero-title">
+        <div class="hero__media">
+            <img src="{{ asset('images/hero-whale.jpg') }}"
+                 alt="Cá nhà táng mẹ và con bơi gần mặt nước đại dương"
+                 width="1920" height="1080" fetchpriority="high" decoding="async">
+        </div>
+        <div class="hero__shade" aria-hidden="true"></div>
+        <div class="hero__bubbles" aria-hidden="true">
+            <span class="bubble bubble--1"></span>
+            <span class="bubble bubble--2"></span>
+            <span class="bubble bubble--3"></span>
+            <span class="bubble bubble--4"></span>
+            <span class="bubble bubble--5"></span>
+        </div>
+
+        <div class="hero__inner container">
+            <p class="hero__pill">
+                <span class="hero__pill-dot" aria-hidden="true"></span>Bạn đang ở mặt nước · 0 m
             </p>
-            <div class="creature-showcase">
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐢</div>
-                    <strong>Rùa Biển Xanh (Vích)</strong>
-                    <span style="font-size: 0.85rem; color: #cbd5e1;">Định hướng vượt hàng ngàn hải lý qua đại dương nhờ cảm nhận từ trường Trái Đất.</span>
+            <h1 class="hero__title" id="hero-title">Học về đại dương qua câu hỏi trắc nghiệm</h1>
+            <p class="hero__subtitle">Đọc tư liệu ngắn, làm bài có tính giờ, rồi xem điểm của bạn trên bảng xếp hạng.</p>
+
+            <div class="hero__actions btn-row">
+                @auth
+                    <a class="btn btn--primary btn--lg" href="{{ route('dashboard') }}">Vào bảng điều khiển</a>
+                    <a class="btn btn--ghost btn--lg" href="{{ route('quiz.play') }}">Làm bài ngay</a>
+                @else
+                    <a class="btn btn--primary btn--lg" href="{{ route('register') }}">Đăng ký miễn phí</a>
+                    <a class="btn btn--ghost btn--lg" href="{{ route('login') }}">Đăng nhập</a>
+                @endauth
+            </div>
+        </div>
+
+        <p class="hero__scroll">Cuộn xuống để xem 5 tầng đại dương<span class="hero__chevron" aria-hidden="true"></span></p>
+    </section>
+
+    {{-- Khung 02: cách hoạt động --}}
+    <section class="how" aria-labelledby="how-title">
+        <div class="container">
+            <h2 class="how__title" id="how-title">Cách hoạt động</h2>
+            <ol class="how__steps">
+                <li class="how__step">
+                    <span class="step-number" aria-hidden="true">1</span>
+                    <h3 class="how__step-title">Đọc tư liệu</h3>
+                    <p class="how__step-text">Mỗi bộ đề có một bài đọc ngắn về một chủ đề đại dương. Thời gian đọc tối đa 3 phút.</p>
+                </li>
+                <li class="how__step">
+                    <span class="step-number" aria-hidden="true">2</span>
+                    <h3 class="how__step-title">Làm bài trắc nghiệm</h3>
+                    <p class="how__step-text">Mỗi câu hỏi có giới hạn thời gian. Trả lời đúng và nhanh được tối đa 1.000 điểm.</p>
+                </li>
+                <li class="how__step">
+                    <span class="step-number" aria-hidden="true">3</span>
+                    <h3 class="how__step-title">Xem kết quả</h3>
+                    <p class="how__step-text">Mỗi đáp án có giải thích. Các câu sai được gom lại để bạn ôn tập.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    {{-- Khung 03: tầng 1 --}}
+    <section class="tier" aria-labelledby="tang-1">
+        <div class="container tier__grid">
+            <div class="tier__text">
+                <div class="tier__sticky">
+                    <p class="tier__depth tier__depth--1">0 – 200 <span class="tier__unit">m</span></p>
+                    <h2 class="tier__name" id="tang-1">Tầng ánh sáng</h2>
+                    <p class="tier__desc">Ánh sáng mặt trời đủ cho quang hợp. Đây là nơi có phần lớn sinh vật biển, như san hô, rùa biển và cá heo.</p>
+                    <p class="tier__note"><strong>Rùa xanh.</strong> Định hướng qua hàng nghìn hải lý nhờ cảm nhận từ trường Trái Đất.</p>
                 </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐬</div>
-                    <strong>Cá Heo Mũi Chai</strong>
-                    <span style="font-size: 0.85rem; color: #cbd5e1;">Sử dụng hệ thống định vị bằng tiếng vang sinh học (Echolocation) để săn mồi và giao tiếp.</span>
+            </div>
+            <figure class="tier__media">
+                <div class="tier__frame">
+                    <img src="{{ asset('images/turtle.jpg') }}"
+                         alt="Rùa xanh bơi trên rạn san hô ở tầng ánh sáng"
+                         width="1400" height="933" loading="lazy" decoding="async">
                 </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🦈</div>
-                    <strong>Cá Mập Trắng Lớn</strong>
-                    <span style="font-size: 0.85rem; color: #cbd5e1;">Phát hiện xung điện từ cực nhỏ từ nhịp tim con mồi nhờ cơ quan Ampullae of Lorenzini.</span>
+                <figcaption class="tier__caption">
+                    <em>Chelonia mydas</em> — rùa xanh.
+                    <span class="tier__credit">Ảnh: Diego Delso, CC BY-SA 4.0.</span>
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    {{-- Khung 04: tầng 2 (ảnh bên trái) --}}
+    <section class="tier tier--reverse" aria-labelledby="tang-2">
+        <div class="container tier__grid">
+            <div class="tier__text">
+                <div class="tier__sticky">
+                    <p class="tier__depth tier__depth--2">200 – 1.000 <span class="tier__unit">m</span></p>
+                    <h2 class="tier__name" id="tang-2">Tầng chạng vạng</h2>
+                    <p class="tier__desc">Ánh sáng yếu dần và không đủ cho quang hợp. Mỗi đêm, nhiều sinh vật bơi lên gần mặt nước để kiếm ăn.</p>
+                    <p class="tier__note"><strong>Cá đèn lồng.</strong> Phát sáng ở bụng để xóa bóng của chính mình trước kẻ săn mồi.</p>
                 </div>
+            </div>
+            <figure class="tier__media">
+                <div class="tier__frame">
+                    <img src="{{ asset('images/lanternfish.jpg') }}"
+                         alt="Cận cảnh phần đầu cá đèn lồng Benthosema glaciale"
+                         width="1460" height="772" loading="lazy" decoding="async">
+                </div>
+                <figcaption class="tier__caption">
+                    <em>Benthosema glaciale</em> — cá đèn lồng (ảnh cận cảnh phần đầu).
+                    <span class="tier__credit">Ảnh: HulloThere, CC BY 4.0.</span>
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    {{-- Khung 05: tầng 3 --}}
+    <section class="tier" aria-labelledby="tang-3">
+        <div class="container tier__grid">
+            <div class="tier__text">
+                <div class="tier__sticky">
+                    <p class="tier__depth tier__depth--3">1.000 – 4.000 <span class="tier__unit">m</span></p>
+                    <h2 class="tier__name" id="tang-3">Tầng nửa đêm</h2>
+                    <p class="tier__desc">Không còn ánh sáng mặt trời. Nhiều loài tự phát sáng, nhiệt độ nước chỉ khoảng 4 °C và áp suất rất lớn.</p>
+                    <p class="tier__note"><strong>Bạch tuộc Dumbo.</strong> Bơi bằng hai chiếc vây hình tai ở hai bên đỉnh thân.</p>
+                </div>
+            </div>
+            <figure class="tier__media">
+                <div class="tier__frame">
+                    <img src="{{ asset('images/dumbo.jpg') }}"
+                         alt="Bạch tuộc Dumbo bơi bằng hai chiếc vây hình tai"
+                         width="1600" height="900" loading="lazy" decoding="async">
+                </div>
+                <figcaption class="tier__caption">
+                    <em>Grimpoteuthis</em> sp. — bạch tuộc Dumbo.
+                    <span class="tier__credit">Ảnh: NOAA Okeanos Explorer, phạm vi công cộng.</span>
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    {{-- Khung 06: tầng 4 (ảnh bên trái, cắt logo NOAA ở góc ảnh) --}}
+    <section class="tier tier--reverse" aria-labelledby="tang-4">
+        <div class="container tier__grid">
+            <div class="tier__text">
+                <div class="tier__sticky">
+                    <p class="tier__depth tier__depth--4">4.000 – 6.000 <span class="tier__unit">m</span></p>
+                    <h2 class="tier__name" id="tang-4">Tầng đáy thẳm</h2>
+                    <p class="tier__desc">Đồng bằng bùn lạnh phủ phần lớn đáy đại dương. Sự sống thưa thớt, tập trung quanh các miệng phun thủy nhiệt.</p>
+                    <p class="tier__note"><strong>Cá ba chân.</strong> Đứng yên trên đáy bằng ba tia vây dài, chờ con mồi trôi tới.</p>
+                </div>
+            </div>
+            <figure class="tier__media">
+                <div class="tier__frame tier__frame--crop">
+                    <img src="{{ asset('images/bathypterois.jpg') }}"
+                         alt="Cá ba chân đứng trên đáy bùn ở tầng đáy thẳm"
+                         width="960" height="540" loading="lazy" decoding="async">
+                </div>
+                <figcaption class="tier__caption">
+                    <em>Bathypterois</em> sp. — cá ba chân trên đáy biển.
+                    <span class="tier__credit">Ảnh: NOAA, North Atlantic Stepping Stones, phạm vi công cộng.</span>
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    {{-- Tầng 5: hố thẳm, không dùng ảnh --}}
+    <section class="tier tier--hadal" aria-labelledby="tang-5">
+        <div class="container">
+            <div class="tier__hadal">
+                <p class="tier__depth tier__depth--5">6.000 – 10.935 <span class="tier__unit">m</span></p>
+                <h2 class="tier__name" id="tang-5">Tầng hố thẳm</h2>
+                <p class="tier__desc">Chỉ một số ít sinh vật sống được ở độ sâu này. Áp suất tại đây gấp hơn 1.000 lần mặt biển và nước gần như lạnh giá quanh năm.</p>
+                <p class="tier__note"><strong>Cá sên Mariana.</strong> Loài cá sống sâu nhất từng được ghi nhận, ở độ sâu khoảng 8.000 m.</p>
             </div>
         </div>
     </section>
 
-    <!-- TẦNG 2: 200m TẦNG CHẠNG VẠNG -->
-    <section class="ocean-zone-section" id="zone-200" data-depth="200" data-zone="Tầng Chạng Vạng (200m - 1000m)">
-        <div class="zone-card">
-            <div class="zone-header">
-                <span class="zone-depth-pill">ĐỘ SÂU: 200m – 1,000m</span>
-                <span style="color: #7dd3fc; font-weight: 600;">🌗 Di Cư Thẳng Đứng Hàng Đêm</span>
-            </div>
-            <h2 style="font-size: 2.1rem; margin-bottom: 1rem;">Tầng Chạng Vạng (Mesopelagic Zone)</h2>
-            <p style="color: #cbd5e1; font-size: 1.05rem;">
-                Ánh sáng mặt trời yếu dần thành một màu xanh lam mờ ảo, không còn đủ cho quá trình quang hợp. Mỗi đêm, hàng ngàn tỷ sinh vật từ tầng này bơi lên mặt nước kiếm ăn, tạo nên cuộc di cư sinh học lớn nhất hành tinh.
+    {{-- Khung 07: kết trang --}}
+    <section class="finale" aria-labelledby="finale-title">
+        <div class="container finale__inner">
+            <p class="finale__depth">10.935<span class="finale__unit">m</span></p>
+            <p class="finale__caption">Tầng hố thẳm · từ 6.000 m đến đáy Challenger Deep, Rãnh Mariana</p>
+
+            <h2 class="finale__title" id="finale-title">Sẵn sàng làm bài chưa?</h2>
+            <p class="finale__text">
+                @auth
+                    Bạn đã có tài khoản. Vào bảng điều khiển để chọn bộ đề theo từng tầng và xem điểm của mình trên bảng xếp hạng.
+                @else
+                    Đăng ký miễn phí để làm bộ đề theo từng tầng và xem điểm của bạn trên bảng xếp hạng.
+                @endauth
             </p>
-            <div class="creature-showcase">
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🦑</div>
-                    <strong>Mực Thủy Tinh (Cockatoo Squid)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Cơ thể trong suốt như pha lê giúp ngụy trang hoàn hảo trước kẻ săn mồi.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐟</div>
-                    <strong>Cá Đèn Lồng (Lanternfish)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Chiếm tới 65% tổng sinh khối cá biển sâu; phát sáng ở bụng để xóa bóng của chính mình.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐋</div>
-                    <strong>Cá Nhà Táng Lặn Sâu</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Có thể nín thở suốt 90 phút để lặn xuống tầng chạng vạng săn mực khổng lồ.</span>
-                </div>
+
+            <div class="finale__actions btn-row">
+                @auth
+                    <a class="btn btn--primary btn--lg" href="{{ route('dashboard') }}">Vào bảng điều khiển</a>
+                    <a class="btn btn--ghost btn--lg" href="{{ route('quiz.play') }}">Làm bài ngay</a>
+                @else
+                    <a class="btn btn--primary btn--lg" href="{{ route('register') }}">Đăng ký miễn phí</a>
+                    <a class="btn btn--ghost btn--lg" href="{{ route('login') }}">Đăng nhập</a>
+                @endauth
             </div>
+
+            <p class="finale__note">OceanQuiz · Học về đại dương qua câu hỏi trắc nghiệm</p>
         </div>
     </section>
-
-    <!-- TẦNG 3: 1000m TẦNG NỬA ĐÊM -->
-    <section class="ocean-zone-section" id="zone-1000" data-depth="1000" data-zone="Tầng Nửa Đêm (1000m - 4000m)">
-        <div class="zone-card">
-            <div class="zone-header">
-                <span class="zone-depth-pill">ĐỘ SÂU: 1,000m – 4,000m</span>
-                <span style="color: #38bdf8; font-weight: 600;">🌌 Bóng Tối Vĩnh Cửu & Phát Quang Sinh Học</span>
-            </div>
-            <h2 style="font-size: 2.1rem; margin-bottom: 1rem;">Tầng Nửa Đêm (Bathypelagic Zone)</h2>
-            <p style="color: #cbd5e1; font-size: 1.05rem;">
-                Không một tia sáng mặt trời nào chạm tới độ sâu 1.000 mét. Ánh sáng duy nhất tại đây được tạo ra bởi phản ứng hóa học phát quang sinh học (Bioluminescence). Áp suất nước vượt ngưỡng 100 lần khí quyển và nhiệt độ chỉ khoảng 4 °C.
-            </p>
-            <div class="creature-showcase">
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🏮</div>
-                    <strong>Cá Vây Chân (Anglerfish)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Treo chiếc "cần câu" phát sáng chứa vi khuẩn cộng sinh ngay trước miệng để dụ con mồi.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🧛</div>
-                    <strong>Mực Ma Cà Rồng (Vampire Squid)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Sống trong vùng tối thiểu oxy và ăn "tuyết biển" (mùn hữu cơ rơi từ tầng trên xuống).</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐉</div>
-                    <strong>Cá Rồng Đèn Đỏ (Stoplight Loosejaw)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Phát ra tia sáng đỏ/hồng ngoại như ống nhòm hồng ngoại mà con mồi không thể nhìn thấy.</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TẦNG 4: 4000m TẦNG ĐÁY THẲM -->
-    <section class="ocean-zone-section" id="zone-4000" data-depth="4000" data-zone="Tầng Đáy Thẳm (4000m - 6000m)">
-        <div class="zone-card">
-            <div class="zone-header">
-                <span class="zone-depth-pill">ĐỘ SÂU: 4,000m – 6,000m</span>
-                <span style="color: #93c5fd; font-weight: 600;">🌋 Miệng Phun Thủy Nhiệt & Hóa Tổng Hợp</span>
-            </div>
-            <h2 style="font-size: 2.1rem; margin-bottom: 1rem;">Tầng Đáy Thẳm (Abyssopelagic Zone)</h2>
-            <p style="color: #cbd5e1; font-size: 1.05rem;">
-                Bao phủ hơn 60% bề mặt Trái Đất, đồng bằng đáy thẳm là vùng bùn lạnh giá. Tuy nhiên, xung quanh các miệng phun thủy nhiệt núi lửa ("Ống khói đen"), sự sống lại bùng nổ nhờ quá trình hóa tổng hợp (Chemosynthesis) thay vì ánh sáng mặt trời.
-            </p>
-            <div class="creature-showcase">
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐙</div>
-                    <strong>Bạch Tuộc Dumbo</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Loài bạch tuộc sống sâu nhất hành tinh, bơi lượn bằng hai chiếc vây giống tai voi Dumbo.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🧪</div>
-                    <strong>Giun Ống Khổng Lồ (Riftia)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Không có miệng và ruột; sống nhờ vi khuẩn chuyển hóa khí độc Hydro Sunfua từ miệng núi lửa.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🔭</div>
-                    <strong>Cá Ba Chân (Tripod Fish)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Đứng bất động trên lớp bùn đáy biển bằng 3 tia vây dài cứng như kiềng ba chân.</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TẦNG 5: 6000m+ RÃNH MARIANA -->
-    <section class="ocean-zone-section" id="zone-6000" data-depth="10984" data-zone="Tầng Hố Thẳm (Rãnh Mariana)">
-        <div class="zone-card" style="border-color: var(--cyan-glow);">
-            <div class="zone-header">
-                <span class="zone-depth-pill">ĐỘ SÂU: 6,000m – 10,984m</span>
-                <span style="color: var(--cyan-glow); font-weight: 700;">⚓ Đã Chạm Đáy Vực Challenger Deep</span>
-            </div>
-            <h2 style="font-size: 2.1rem; margin-bottom: 1rem;">Tầng Hố Thẳm (Hadalpelagic - Rãnh Mariana)</h2>
-            <p style="color: #cbd5e1; font-size: 1.05rem;">
-                Bạn đã chạm tới điểm sâu nhất Trái Đất: Vực Challenger Deep ở độ sâu 10.984 mét. Áp suất tại đây gấp hơn 1.071 lần mặt biển — tương đương sức nặng của 50 chiếc máy bay phản lực đè lên cơ thể. Bạn đã sẵn sàng thử thách kiến thức đại dương của mình?
-            </p>
-            <div class="creature-showcase">
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🐟</div>
-                    <strong>Cá Sên Mariana (Snailfish)</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Kỷ lục loài cá sống sâu nhất (~8.000m) với hộp sọ mềm và nồng độ phân tử TMAO cực cao.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🦐</div>
-                    <strong>Giáp Xác Amphipod Khổng Lồ</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Phủ lớp gel nhôm hydroxit quanh vỏ để không bị áp suất cực đại làm tan chảy.</span>
-                </div>
-                <div class="creature-box">
-                    <div style="font-size: 2rem;">🦠</div>
-                    <strong>Trùng Chân Giả Xenophyophores</strong>
-                    <span style="font-size: 0.85rem; color: #94a3b8;">Sinh vật đơn bào khổng lồ rộng tới 20 cm sinh sống ngay dưới đáy Challenger Deep.</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Thanh cố định Đăng nhập / Đăng ký dưới đáy -->
-    <div class="fixed-bottom-auth-bar">
-        <div style="display: flex; align-items: center; gap: 0.85rem;">
-            <span style="font-size: 1.4rem;">🧭</span>
-            <div>
-                <div style="font-weight: 700; font-size: 0.95rem;">Sẵn sàng chinh phục Đấu Trường Kiến Thức Đại Dương?</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Đọc tư liệu khoa học, phản xạ tốc độ kiểu Kahoot và ghi danh lên Bảng Xếp Hạng Toàn Cầu.</div>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 0.85rem;">
-            @auth
-                <a href="{{ route('quiz.play') }}" class="btn btn-primary">🚀 Vào Làm Quiz Ngay</a>
-                <a href="{{ route('dashboard') }}" class="btn btn-outline">Bảng Điều Khiển</a>
-            @else
-                <a href="{{ route('login') }}" class="btn btn-outline">🔐 Đăng Nhập</a>
-                <a href="{{ route('register') }}" class="btn btn-primary">⚡ Đăng Ký Tài Khoản</a>
-            @endauth
-        </div>
-    </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-    function scrollToZone(id) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.scrollY;
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-        const scrollFraction = maxScroll > 0 ? Math.min(Math.max(scrollTop / maxScroll, 0), 1) : 0;
-
-        const simulatedMeters = Math.round(scrollFraction * 10984);
-        document.getElementById('currentDepthDisplay').textContent = simulatedMeters.toLocaleString() + 'm';
-
-        const sections = document.querySelectorAll('.ocean-zone-section');
-        const scaleItems = document.querySelectorAll('.depth-scale-item');
-        let activeZoneId = 'zone-0';
-        let activeZoneTitle = 'Tầng Ánh Sáng';
-
-        sections.forEach(sec => {
-            const rect = sec.getBoundingClientRect();
-            if (rect.top <= window.innerHeight * 0.5) {
-                activeZoneId = sec.id;
-                activeZoneTitle = sec.getAttribute('data-zone');
-            }
-        });
-
-        document.getElementById('currentZoneName').textContent = activeZoneTitle;
-
-        scaleItems.forEach(item => {
-            if (item.getAttribute('data-target') === activeZoneId) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
-    });
-</script>
-@endpush

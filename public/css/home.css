@@ -1,0 +1,748 @@
+/*
+ * OceanQuiz — Trang chủ (landing)
+ * Chỉ HTML + CSS, không JavaScript. Nền gradient lặn dần từ mặt nước xuống đáy.
+ * Mọi tương tác bằng link/CSS animation: chấm thước độ sâu chạy theo cuộn nhờ
+ * animation-timeline: scroll(); trình duyệt không hỗ trợ thì ẩn chấm.
+ */
+
+/* --- Nền toàn trang: mặt nước sáng dần tối xuống đáy --------------------- */
+
+.landing {
+    position: relative;
+    overflow-x: clip;
+    background: linear-gradient(
+        180deg,
+        #0a4f7b 0%,
+        #054b84 13%,
+        #093c62 22%,
+        #072d50 35%,
+        #052139 48%,
+        #04152b 61%,
+        #020d1c 73%,
+        #010a14 86%,
+        #01060c 100%
+    );
+}
+
+/* --- Thước độ sâu cố định bên phải ------------------------------------- */
+
+.depth-ruler {
+    position: fixed;
+    top: 104px;
+    bottom: 64px;
+    right: clamp(16px, 3vw, 44px);
+    z-index: 30;
+    width: 1px;
+    pointer-events: none;
+}
+
+.depth-ruler__track {
+    position: absolute;
+    inset: 0;
+}
+
+.depth-ruler__line {
+    position: absolute;
+    inset: 0;
+    width: 1px;
+    background: linear-gradient(
+        180deg,
+        var(--zone-1) 0%,
+        var(--zone-2) 24%,
+        var(--zone-3) 48%,
+        var(--zone-4) 72%,
+        var(--zone-5) 100%
+    );
+    opacity: 0.85;
+}
+
+.depth-ruler__dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 9px;
+    height: 9px;
+    margin-left: -4px;
+    margin-top: -4.5px;
+    border-radius: 50%;
+    background: var(--text-strong);
+    box-shadow: 0 0 0 3px rgba(6, 18, 26, 0.45);
+}
+
+.depth-ruler__marks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.depth-ruler__mark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+}
+
+.depth-ruler__mark:nth-child(1) { top: 0; }
+.depth-ruler__mark:nth-child(2) { top: 50%; }
+.depth-ruler__mark:nth-child(3) { top: 67%; }
+.depth-ruler__mark:nth-child(4) { top: 84%; }
+.depth-ruler__mark:nth-child(5) { top: 100%; }
+
+.depth-ruler__tick {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 9px;
+    height: 1px;
+    background: rgba(247, 251, 253, 0.55);
+}
+
+.depth-ruler__label {
+    position: absolute;
+    right: 16px;
+    top: 0;
+    transform: translateY(-50%);
+    color: rgba(230, 238, 244, 0.74);
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Chấm chạy theo vị trí cuộn trang (scroll-driven animation thuần CSS). */
+@supports (animation-timeline: scroll()) {
+    .depth-ruler__dot {
+        animation-name: ruler-dive;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: scroll(root block);
+    }
+}
+
+@supports not (animation-timeline: scroll()) {
+    .depth-ruler__dot {
+        display: none;
+    }
+}
+
+@keyframes ruler-dive {
+    from {
+        top: 0%;
+    }
+    to {
+        top: 100%;
+    }
+}
+
+/* --- Khung 01: hero mặt nước ------------------------------------------- */
+
+.hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: calc(100vh - var(--nav-height));
+    min-height: calc(100svh - var(--nav-height));
+    padding-block: clamp(2rem, 5.5vh, 3.4rem) clamp(6rem, 13vh, 8.5rem);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.hero__media,
+.hero__shade,
+.hero__bubbles {
+    position: absolute;
+    inset: 0;
+}
+
+.hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 46%;
+}
+
+.hero__shade {
+    background:
+        linear-gradient(180deg, rgba(4, 14, 22, 0.28) 0%, rgba(4, 14, 22, 0.15) 42%, rgba(4, 14, 22, 0.1) 70%, rgba(4, 14, 22, 0) 100%),
+        linear-gradient(180deg, rgba(5, 75, 132, 0) 72%, rgba(5, 75, 132, 0.22) 94%, #054b84 100%);
+}
+
+.hero__bubbles {
+    overflow: hidden;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(214, 235, 245, 0.09);
+    border: 1px solid rgba(214, 235, 245, 0.08);
+    animation: bubble-float 18s var(--ease) infinite alternate;
+}
+
+.bubble--1 {
+    width: 34px;
+    height: 34px;
+    left: 7%;
+    top: 26%;
+    animation-delay: -3s;
+}
+
+.bubble--2 {
+    width: 16px;
+    height: 16px;
+    left: 16%;
+    top: 52%;
+    animation-delay: -8s;
+    animation-duration: 22s;
+}
+
+.bubble--3 {
+    width: 44px;
+    height: 44px;
+    right: 24%;
+    top: 18%;
+    animation-delay: -5s;
+    animation-duration: 24s;
+}
+
+.bubble--4 {
+    width: 22px;
+    height: 22px;
+    right: 9%;
+    top: 66%;
+    animation-delay: -11s;
+    animation-duration: 20s;
+}
+
+.bubble--5 {
+    width: 11px;
+    height: 11px;
+    left: 42%;
+    top: 74%;
+    animation-delay: -6s;
+}
+
+@keyframes bubble-float {
+    from {
+        transform: translate3d(0, 0, 0);
+        opacity: 0.7;
+    }
+    to {
+        transform: translate3d(6px, -26px, 0);
+        opacity: 1;
+    }
+}
+
+.hero__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.85rem, 2.2vh, 1.3rem);
+    text-align: center;
+}
+
+.hero__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px 5px 12px;
+    border: 1px solid rgba(230, 238, 244, 0.34);
+    border-radius: var(--radius-pill);
+    background: rgba(4, 14, 22, 0.42);
+    color: var(--text-strong);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.hero__pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--zone-1);
+    flex: none;
+}
+
+.hero__title {
+    max-width: 16em;
+    font-size: clamp(2.15rem, 1rem + 3.55vw, 3.8rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+    text-shadow: 0 2px 30px rgba(2, 10, 16, 0.5);
+}
+
+.hero__subtitle {
+    max-width: 62ch;
+    font-size: clamp(1.02rem, 0.93rem + 0.32vw, 1.12rem);
+    color: rgba(247, 251, 253, 0.92);
+    text-shadow: 0 1px 18px rgba(2, 10, 16, 0.55);
+}
+
+.hero__actions {
+    justify-content: center;
+    margin-top: 0.35rem;
+}
+
+.hero__actions .btn--lg {
+    min-height: 56px;
+    padding: 15px 32px;
+}
+
+.hero .btn--ghost {
+    border-color: rgba(230, 238, 244, 0.45);
+    background: rgba(4, 14, 22, 0.3);
+}
+
+.hero .btn--ghost:hover,
+.hero .btn--ghost:focus-visible {
+    border-color: var(--zone-1);
+    background: rgba(4, 14, 22, 0.45);
+}
+
+.hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.5rem, 4vh, 2.6rem);
+    transform: translateX(-50%);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 90vw;
+    color: rgba(247, 251, 253, 0.88);
+    font-size: 0.92rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.hero__chevron {
+    display: block;
+    width: 13px;
+    height: 13px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    animation: chevron-bob 2.2s var(--ease) infinite;
+}
+
+@keyframes chevron-bob {
+    0%,
+    100% {
+        transform: rotate(45deg) translate3d(0, 0, 0);
+        opacity: 0.6;
+    }
+    50% {
+        transform: rotate(45deg) translate3d(4px, 4px, 0);
+        opacity: 1;
+    }
+}
+
+/* --- Khung 02: cách hoạt động ------------------------------------------ */
+
+.how {
+    position: relative;
+    padding-block: clamp(4rem, 9vh, 6.5rem) clamp(6rem, 18vh, 11rem);
+}
+
+.how__title {
+    margin-bottom: clamp(2rem, 4.5vh, 3rem);
+    font-size: clamp(1.75rem, 1.3rem + 1.2vw, 2.15rem);
+}
+
+.how__steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.5rem, 2.4vw, 1.75rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.how__step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+}
+
+.how__step .step-number {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.how__step-title {
+    font-size: 1.18rem;
+}
+
+.how__step-text {
+    max-width: 21rem;
+    color: rgba(230, 238, 244, 0.78);
+    font-size: 0.98rem;
+    line-height: 1.62;
+}
+
+/* --- Khung 03–06: các tầng đại dương ------------------------------------ */
+
+.tier {
+    position: relative;
+}
+
+.tier__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: clamp(2rem, 4.5vw, 3.5rem);
+    min-height: 92vh;
+    padding-block: clamp(2.5rem, 5vh, 4rem);
+}
+
+.tier__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+/* Cụm nhãn độ sâu + tên tầng dính lại khi cuộn, tạo cảm giác đang lặn. */
+.tier__sticky {
+    position: sticky;
+    top: 100px;
+}
+
+.tier__depth {
+    font-size: clamp(2.5rem, 1.2rem + 3.6vw, 4rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.tier__depth--1 { color: var(--zone-1); }
+.tier__depth--2 { color: var(--zone-2); }
+.tier__depth--3 { color: var(--zone-3); }
+.tier__depth--4 { color: var(--zone-4); }
+.tier__depth--5 { color: var(--zone-5); }
+
+.tier__unit {
+    margin-left: 0.14em;
+    font-size: 0.38em;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: rgba(230, 238, 244, 0.68);
+}
+
+.tier__name {
+    margin-top: 0.55rem;
+    font-size: clamp(1.4rem, 1.15rem + 0.95vw, 1.9rem);
+}
+
+.tier__desc {
+    max-width: 26.5rem;
+    margin-top: 0.8rem;
+    color: rgba(230, 238, 244, 0.78);
+    font-size: 1rem;
+    line-height: 1.68;
+}
+
+.tier__note {
+    max-width: 28rem;
+    margin-top: clamp(1.25rem, 3vh, 1.75rem);
+    padding-left: 1rem;
+    border-left: 3px solid var(--teal);
+    color: rgba(230, 238, 244, 0.8);
+    font-size: 1rem;
+    line-height: 1.62;
+}
+
+.tier__note strong {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+
+.tier__media {
+    position: sticky;
+    top: 64px;
+    align-self: start;
+    margin: 0;
+    min-width: 0;
+}
+
+.tier__frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--panel);
+}
+
+.tier__frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Ảnh gốc có logo NOAA ở góc trên trái: đẩy ảnh xuống để cắt hẳn phần góc. */
+.tier__frame--crop img {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 124%;
+    bottom: 2%;
+    object-fit: cover;
+    object-position: 50% 100%;
+}
+
+.tier__caption {
+    margin-top: 0.85rem;
+    color: rgba(230, 238, 244, 0.72);
+    font-size: 0.875rem;
+    font-style: italic;
+    line-height: 1.55;
+}
+
+.tier__credit {
+    display: block;
+    margin-top: 2px;
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    font-style: normal;
+}
+
+/* Xen kẽ trái/phải: ảnh sang trái, chữ sang phải. */
+.tier--reverse .tier__text {
+    order: 2;
+}
+
+.tier--reverse .tier__media {
+    order: 1;
+}
+
+/* --- Tầng 5: hố thẳm, không dùng ảnh ----------------------------------- */
+
+.tier--hadal {
+    display: flex;
+    align-items: stretch;
+    min-height: 92vh;
+    padding-block: clamp(2.5rem, 5vh, 4rem);
+}
+
+.tier--hadal .container {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.tier__hadal {
+    position: sticky;
+    top: 100px;
+    max-width: 40rem;
+}
+
+.tier--hadal .tier__depth--5 {
+    font-size: clamp(1.9rem, 1rem + 2.5vw, 3.1rem);
+}
+
+/* --- Khung 07: kết trang ----------------------------------------------- */
+
+.finale {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    min-height: calc(100vh - var(--nav-height));
+    min-height: calc(100svh - var(--nav-height));
+    padding-block: clamp(4rem, 10vh, 6.5rem) clamp(2.5rem, 5vh, 4rem);
+}
+
+.finale__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 46rem;
+    margin-inline: auto;
+    text-align: center;
+}
+
+.finale__depth {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.1em;
+    color: var(--zone-5);
+    font-size: clamp(3.6rem, 1.6rem + 9vw, 8.2rem);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+}
+
+.finale__unit {
+    font-size: 0.34em;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: rgba(230, 238, 244, 0.62);
+}
+
+.finale__caption {
+    margin-top: 1rem;
+    color: rgba(230, 238, 244, 0.8);
+    font-size: 1rem;
+}
+
+.finale__title {
+    margin-top: 1.3rem;
+    font-size: clamp(1.55rem, 1.2rem + 1.2vw, 2.15rem);
+}
+
+.finale__text {
+    max-width: 34rem;
+    margin-top: 0.85rem;
+    color: rgba(230, 238, 244, 0.78);
+    font-size: 1rem;
+    line-height: 1.65;
+}
+
+.finale__actions {
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.finale__actions .btn--lg {
+    min-height: 56px;
+    padding: 15px 30px;
+}
+
+.finale__note {
+    margin-top: clamp(2.5rem, 6vh, 4rem);
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+
+/* --- Tiêu điểm bàn phím ------------------------------------------------- */
+
+.landing a:focus-visible {
+    outline: 2px solid var(--zone-1);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+/* --- Màn hình vừa (thước độ sâu có thể chạm nội dung) ------------------- */
+
+@media (max-width: 1279px) {
+    .depth-ruler {
+        display: none;
+    }
+}
+
+/* --- Màn hình hẹp: xếp dọc ------------------------------------------------- */
+
+@media (max-width: 899px) {
+    .tier__grid {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 0;
+        gap: 1.75rem;
+        padding-block: clamp(3rem, 8vh, 4.5rem);
+    }
+
+    .tier__sticky,
+    .tier__media,
+    .tier__hadal {
+        position: static;
+    }
+
+    .tier--hadal {
+        display: block;
+        min-height: 0;
+        padding-block: clamp(3.5rem, 9vh, 5rem);
+    }
+
+    .finale {
+        min-height: 0;
+    }
+
+    .tier--reverse .tier__text,
+    .tier--reverse .tier__media {
+        order: initial;
+    }
+
+    .tier__desc,
+    .tier__note {
+        max-width: 38rem;
+    }
+
+    .how__steps {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2rem;
+    }
+
+    .how__step-text {
+        max-width: 46ch;
+    }
+
+}
+
+@media (max-width: 600px) {
+    .hero {
+        padding-block: 2.5rem 6.5rem;
+    }
+
+    .hero__title {
+        max-width: 100%;
+    }
+
+    .hero__actions {
+        gap: 0.65rem;
+    }
+
+    .hero__actions .btn {
+        padding-inline: 18px;
+        font-size: 0.95rem;
+    }
+
+    .hero__scroll {
+        font-size: 0.85rem;
+        gap: 10px;
+    }
+
+    .bubble--3,
+    .bubble--4 {
+        display: none;
+    }
+
+    .tier__unit {
+        font-size: 0.34em;
+    }
+
+    .finale__depth {
+        letter-spacing: -0.02em;
+    }
+
+    .finale__caption {
+        font-size: 0.9rem;
+    }
+}
+
+/* --- Tôn trọng prefers-reduced-motion ----------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .bubble,
+    .hero__chevron,
+    .depth-ruler__dot {
+        animation: none;
+    }
+
+    .depth-ruler__dot {
+        top: 0;
+    }
+}

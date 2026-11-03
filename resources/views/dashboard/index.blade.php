@@ -1,131 +1,155 @@
 @extends('layouts.app')
 
-@section('title', 'Bảng Điều Khiển Cá Nhân | AbyssalMind')
+@section('title', 'Bảng điều khiển | OceanQuiz')
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/learner.css') }}">
+@endpush
 
 @section('content')
-<div class="container">
-    <div class="bento-dashboard-grid">
+<div class="container learner-page">
+    <h1 class="page-title dashboard-head">Bảng điều khiển</h1>
 
-        <!-- CỘT TRÁI: HỒ SƠ CÁ NHÂN, THỐNG KÊ, BẮT ĐẦU QUIZ & ÔN TẬP CÂU SAI -->
-        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            <div class="bento-card">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
-                    <div style="width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #00f2fe, #0284c7); display:flex; align-items:center; justify-content:center; font-size: 2rem; color:#021024; font-weight: 800;">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </div>
+    <div class="dashboard-grid">
+        {{-- Cột trái: hồ sơ, thống kê, lối tắt làm bài và cách tính điểm --}}
+        <div class="dash-side">
+            <section class="card profile-card" aria-labelledby="profile-name">
+                <div class="profile-card__head">
+                    <div class="avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</div>
                     <div>
-                        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan-glow); font-weight: 700;">
-                            {{ $user->isAdmin() ? '👑 Đô Đốc Hải Quân (Admin)' : '🤿 Nhà Thám Hiểm Đại Dương' }}
-                        </span>
-                        <h2 style="font-size: 1.4rem;">{{ $user->name }}</h2>
-                        <div style="font-size: 0.88rem; color: var(--text-muted);">{{ $user->email }}</div>
+                        <p class="profile-card__label">Người dùng</p>
+                        <h2 class="profile-card__name" id="profile-name">{{ $user->name }}</h2>
+                        <p class="profile-card__email">{{ $user->email }}</p>
                     </div>
                 </div>
 
-                <div class="stat-grid-2">
-                    <div class="stat-tile">
-                        <div style="font-size: 0.78rem; color: var(--text-muted);">TỔNG ĐIỂM TÍCH LŨY</div>
-                        <div class="value">{{ number_format($user->total_score) }}</div>
+                <div class="profile-tiles">
+                    <div class="tile">
+                        <p class="tile__label">Tổng điểm</p>
+                        <p class="tile__value">{{ number_format($user->total_score, 0, ',', '.') }}</p>
                     </div>
-                    <div class="stat-tile">
-                        <div style="font-size: 0.78rem; color: var(--text-muted);">HẠNG TOÀN CẦU</div>
-                        <div class="value">#{{ $globalRank }}</div>
+                    <div class="tile">
+                        <p class="tile__label">Xếp hạng</p>
+                        <p class="tile__value">#{{ $globalRank }}</p>
                     </div>
                 </div>
 
-                <!-- Nút Bắt đầu làm Quiz -->
-                <a href="{{ route('quiz.play') }}" class="btn btn-primary" style="width: 100%; padding: 1.05rem; font-size: 1.08rem; margin-bottom: 0.9rem;">
-                    🚀 BẮT ĐẦU LÀM BÀI QUIZ
-                </a>
+                <div class="profile-actions">
+                    <a class="btn btn--primary" href="{{ route('quiz.play') }}">Bắt đầu làm bài</a>
+                    <a class="btn btn--ghost" href="{{ route('quiz.mistakes') }}">Ôn tập câu sai ({{ $mistakeCount }} câu)</a>
+                </div>
+            </section>
 
-                <!-- Nút Ôn tập các câu trả lời sai -->
-                <a href="{{ route('quiz.mistakes') }}" class="btn btn-warning" style="width: 100%; padding: 0.9rem;">
-                    🎯 Ôn Tập Câu Sai ({{ $mistakeCount }} câu trong 5 lần gần nhất)
-                </a>
-            </div>
-
-            <div class="bento-card" style="background: rgba(14, 165, 233, 0.08);">
-                <h3 style="font-size: 1.05rem; margin-bottom: 0.5rem;">⚡ Cơ Chế Tính Điểm Tốc Độ Kahoot</h3>
-                <p style="font-size: 0.88rem; color: var(--text-muted);">
-                    Mỗi lượt thi gồm <strong>Bước 1: Đọc hiểu văn bản (3 phút)</strong> và <strong>Bước 2: Phản xạ trắc nghiệm Kahoot</strong>. Trả lời đúng càng nhanh, bạn càng nhận được tới <strong>1.000 điểm</strong> mỗi câu!
-                </p>
-            </div>
+            <section class="card points-card" aria-labelledby="points-title">
+                <h2 class="points-card__title" id="points-title">Cách tính điểm</h2>
+                <p>Mỗi lượt gồm 2 bước: đọc tư liệu (tối đa 3 phút) rồi trả lời các câu hỏi trắc nghiệm.</p>
+                <p>Trả lời đúng được từ 500 đến 1.000 điểm, càng nhanh càng nhiều. Trả lời sai hoặc hết giờ được 0 điểm.</p>
+            </section>
         </div>
 
-        <!-- CỘT PHẢI: LỊCH SỬ 5 LẦN LÀM BÀI GẦN NHẤT -->
-        <div class="bento-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        {{-- Cột phải: lịch sử 5 lượt gần nhất --}}
+        <section class="card history-card" aria-labelledby="history-title">
+            <div class="history-head">
                 <div>
-                    <h2 style="font-size: 1.45rem;">📜 Lịch Sử 5 Lần Chinh Phục Gần Nhất</h2>
-                    <p style="font-size: 0.88rem; color: var(--text-muted);">Bấm vào từng thẻ bên dưới để xem chi tiết đúng/sai của từng câu hỏi</p>
+                    <h2 class="history-title" id="history-title">Lịch sử 5 lần làm bài gần nhất</h2>
+                    <p class="history-subtitle">Bấm vào từng lượt để xem chi tiết đúng/sai.</p>
                 </div>
-                <span class="zone-depth-pill">Tổng số bài đã làm: {{ $user->quizzes_completed }}</span>
+                <p class="history-total">Tổng số bài đã làm: {{ $totalAttempts }}</p>
             </div>
 
-            @forelse($recentAttempts as $index => $attempt)
-                <details class="attempt-collapse" {{ $index === 0 ? 'open' : '' }}>
-                    <summary>
-                        <div>
-                            <div style="font-size: 1.05rem; color: var(--cyan-glow);">
-                                {{ $attempt->quizSet->title ?? 'Bộ đề Khám phá Đại dương' }}
-                            </div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400; margin-top: 0.2rem;">
-                                🕒 {{ $attempt->created_at->diffForHumans() }} • 🌊 {{ $attempt->quizSet->ocean_zone ?? 'Biển sâu' }}
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; color: #4ade80;">
-                                +{{ number_format($attempt->score) }} điểm
-                            </div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">
-                                Đúng {{ $attempt->correct_count }}/{{ $attempt->total_questions }} câu ▾
-                            </div>
-                        </div>
-                    </summary>
+            @forelse ($recentAttempts as $attempt)
+                @php
+                    $quizSet = $attempt->quizSet;
+                    $zoneRaw = (string) ($quizSet->ocean_zone ?? '');
+                    $zoneShort = $zoneRaw !== ''
+                        ? \Illuminate\Support\Str::ucfirst(\Illuminate\Support\Str::lower(trim(\Illuminate\Support\Str::before($zoneRaw, ' ('))))
+                        : 'Đại dương';
+                    $zoneLower = \Illuminate\Support\Str::lower($zoneRaw);
+                    $zoneLevel = \Illuminate\Support\Str::contains($zoneLower, 'hố thẳm')
+                        ? 5
+                        : (\Illuminate\Support\Str::contains($zoneLower, 'đáy')
+                            ? 4
+                            : (\Illuminate\Support\Str::contains($zoneLower, 'nửa đêm')
+                                ? 3
+                                : (\Illuminate\Support\Str::contains($zoneLower, 'chạng vạng') ? 2 : 1)));
+                    $sortedAnswers = $attempt->answers
+                        ->sortBy(fn ($answer) => optional($answer->question)->id ?? 0)
+                        ->values();
+                @endphp
 
-                    <div class="attempt-breakdown">
-                        @foreach($attempt->answers as $ans)
-                            @php
-                                $q = $ans->question;
-                                $options = $q ? $q->options : [];
-                                $userChoiceText = ($ans->selected_option_index !== null && isset($options[$ans->selected_option_index]))
-                                    ? $options[$ans->selected_option_index]
-                                    : '⏱️ Hết giờ / Không chọn';
-                                $correctChoiceText = ($q && isset($options[$q->correct_option_index]))
-                                    ? $options[$q->correct_option_index]
-                                    : 'N/A';
-                            @endphp
-                            <div class="breakdown-item {{ $ans->is_correct ? '' : 'wrong' }}">
-                                <div style="display:flex; justify-content:space-between; gap:1rem; font-weight:600; font-size:0.95rem;">
-                                    <span>{{ $q->question_text ?? 'Câu hỏi đã xóa' }}</span>
-                                    <span style="font-family:'JetBrains Mono',monospace; white-space:nowrap; color: {{ $ans->is_correct ? '#4ade80' : '#f87171' }};">
-                                        {{ $ans->is_correct ? '+' . $ans->points_earned . ' điểm' : '0 điểm' }} ({{ number_format($ans->time_taken, 1) }}s)
-                                    </span>
-                                </div>
-                                <div style="font-size: 0.85rem; margin-top: 0.45rem; color: #cbd5e1;">
-                                    <span>Bạn chọn: <strong style="color: {{ $ans->is_correct ? '#4ade80' : '#fca5a5' }}">{{ $userChoiceText }}</strong></span>
-                                    @if(!$ans->is_correct)
-                                        <span style="margin-left: 1rem;">| Đáp án đúng: <strong style="color: #4ade80;">{{ $correctChoiceText }}</strong></span>
-                                    @endif
-                                </div>
-                                @if($q && $q->explanation)
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem; font-style: italic;">
-                                        💡 Giải thích: {{ $q->explanation }}
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
+                <article class="attempt">
+                    <div class="attempt__head">
+                        <div>
+                            <h3 class="attempt__title">{{ $quizSet->title ?? 'Bộ đề không còn tồn tại' }}</h3>
+                            <p class="attempt__meta">
+                                <span class="zone">
+                                    <span class="zone__dot zone__dot--{{ $zoneLevel }}" aria-hidden="true"></span>
+                                    {{ $zoneShort }}
+                                </span>
+                                <span aria-hidden="true">·</span>
+                                <span>{{ $attempt->created_at->diffForHumans() }}</span>
+                            </p>
+                        </div>
+                        <div class="attempt__side">
+                            <p class="attempt__score">+{{ number_format($attempt->score, 0, ',', '.') }} điểm</p>
+                            <p class="attempt__correct">Đúng {{ $attempt->correct_count }}/{{ $attempt->total_questions }} câu</p>
+                        </div>
                     </div>
-                </details>
+
+                    <details class="attempt__details" {{ $loop->first ? 'open' : '' }}>
+                        <summary>Xem chi tiết đúng/sai</summary>
+                        <div class="attempt__answers">
+                            @foreach ($sortedAnswers->take(4) as $answer)
+                                @php
+                                    $question = $answer->question;
+                                    $options = $question->options ?? [];
+                                    $selectedIndex = $answer->selected_option_index;
+                                    $selectedText = $selectedIndex !== null && isset($options[$selectedIndex])
+                                        ? $options[$selectedIndex]
+                                        : 'Hết giờ, không chọn';
+                                    $correctText = $question && isset($options[$question->correct_option_index])
+                                        ? $options[$question->correct_option_index]
+                                        : 'Không có đáp án';
+                                @endphp
+
+                                <div class="answer-line">
+                                    <p class="answer-line__head">
+                                        <span class="answer-line__question">Câu {{ $loop->iteration }}: {{ $question->question_text ?? 'Câu hỏi đã bị xóa' }}</span>
+                                        <span class="answer-line__points {{ $answer->is_correct ? 'is-correct' : 'is-wrong' }}">
+                                            @if ($answer->is_correct)
+                                                +{{ number_format($answer->points_earned, 0, ',', '.') }} điểm
+                                            @else
+                                                0 điểm
+                                            @endif
+                                            ({{ number_format($answer->time_taken, 1, ',', '.') }} giây)
+                                        </span>
+                                    </p>
+                                    <p class="answer-line__choice">
+                                        Bạn chọn:
+                                        <strong class="{{ $answer->is_correct ? 'is-correct' : 'is-wrong' }}">{{ $selectedText }}</strong>
+                                        @unless ($answer->is_correct)
+                                            <span class="choice-divider" aria-hidden="true">|</span>
+                                            Đáp án đúng:
+                                            <strong class="is-correct">{{ $correctText }}</strong>
+                                        @endunless
+                                    </p>
+                                </div>
+                            @endforeach
+
+                            @if ($sortedAnswers->count() > 4)
+                                <p class="answer-more">… và {{ $sortedAnswers->count() - 4 }} câu khác</p>
+                            @endif
+                        </div>
+                    </details>
+                </article>
             @empty
-                <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
-                    <div style="font-size: 3rem; margin-bottom: 0.75rem;">🌊</div>
-                    <p>Bạn chưa thực hiện bài thi khám phá đại dương nào.</p>
-                    <a href="{{ route('quiz.play') }}" class="btn btn-primary" style="margin-top: 1rem;">Làm Bài Thi Đầu Tiên Ngay</a>
+                <div class="empty-state empty-state--history">
+                    <p class="empty-state__title">Chưa có lượt làm bài nào</p>
+                    <p>Bắt đầu lượt làm bài đầu tiên để lưu điểm và theo dõi tiến bộ của bạn tại đây.</p>
+                    <a class="btn btn--ghost btn--sm" href="{{ route('quiz.play') }}">Bắt đầu làm bài</a>
                 </div>
             @endforelse
-        </div>
-
+        </section>
     </div>
 </div>
 @endsection
