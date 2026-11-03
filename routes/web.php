@@ -1,13 +1,14 @@
 <?php
+
 // [Thành viên 1 - Owner] routes/web.php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\QuizController;
-use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
+use Illuminate\Support\Facades\Route;
 
 // --- KHU VỰC CỦA THÀNH VIÊN 1 (OWNER): LANDING PAGE, LEADERBOARD & AUTH ---
 Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
@@ -37,8 +38,7 @@ Route::middleware('auth')->prefix('quiz')->name('quiz.')->group(function () {
 // --- KHU VỰC CỦA THÀNH VIÊN 3 (CONTRIBUTOR B): ADMIN DASHBOARD, WIKIPEDIA API & GEMINI AI ---
 Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
-    Route::post('/fetch-wikipedia', [AdminController::class, 'fetchWikipedia'])->name('wikipedia');
-    Route::post('/generate-gemini', [AdminController::class, 'generateGemini'])->name('gemini');
-    Route::post('/quiz-sets', [AdminController::class, 'storeQuizSet'])->name('quiz-sets.store');
-    Route::delete('/quiz-sets/{quizSet}', [AdminController::class, 'destroyQuizSet'])->name('quiz-sets.destroy');
 });
+
+require __DIR__.'/admin-articles.php';
+require __DIR__.'/admin-question-sets.php';
