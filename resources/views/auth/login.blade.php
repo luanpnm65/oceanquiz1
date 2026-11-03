@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Submarine Crew Login | AbyssalMind')
+@section('title', 'Đăng Nhập Tàu Ngầm | AbyssalMind')
 
 @section('content')
 <div class="container" style="max-width: 480px; margin-top: 3rem;">
     <div class="bento-card">
         <div style="text-align: center; margin-bottom: 1.75rem;">
             <div style="font-size: 2.5rem;">⚓</div>
-            <h1 style="font-size: 1.65rem;">Submarine Crew Login</h1>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Demo Admin: <code>admin@ocean.io</code> / <code>password123</code></p>
+            <h1 style="font-size: 1.65rem;">Đăng Nhập Hệ Thống</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Tài khoản Admin mẫu: <code>admin@ocean.io</code> / <code>password123</code></p>
         </div>
 
         @if($errors->any())
@@ -20,22 +20,22 @@
         <form action="{{ route('login.submit') }}" method="POST" style="display: flex; flex-direction: column; gap: 1.15rem;">
             @csrf
             <div>
-                <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Email Address</label>
+                <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Địa chỉ Email</label>
                 <input type="email" name="email" value="{{ old('email', 'explorer@ocean.io') }}" class="form-control" required autofocus>
             </div>
 
             <div>
-                <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Password</label>
+                <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Mật khẩu</label>
                 <input type="password" name="password" value="password123" class="form-control" required>
             </div>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-                🚀 Authenticate & Enter Bridge
+                🚀 Đăng Nhập Vào Khoang Lái
             </button>
         </form>
 
         <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
-            New deep-sea explorer? <a href="{{ route('register') }}" style="color: var(--cyan-glow);">Register here</a>
+            Chưa có tài khoản thám hiểm? <a href="{{ route('register') }}" style="color: var(--cyan-glow);">Đăng ký ngay</a>
         </p>
     </div>
 </div>

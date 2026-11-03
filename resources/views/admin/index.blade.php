@@ -1,112 +1,108 @@
 @extends('layouts.app')
 
-@section('title', 'Admin AI Command Center | AbyssalMind')
+@section('title', 'Trung Tâm Quản Trị AI | AbyssalMind')
 
 @section('content')
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
         <div>
-            <span class="zone-depth-pill">ADMINISTRATION & AI AUTOMATION</span>
-            <h1 style="font-size: 1.9rem; margin-top: 0.4rem;">⚡ Wikipedia + Gemini AI Quiz Studio</h1>
+            <span class="zone-depth-pill">QUẢN TRỊ HỆ THỐNG & TỰ ĐỘNG HÓA AI</span>
+            <h1 style="font-size: 1.9rem; margin-top: 0.4rem;">⚡ Trình Tạo Đề Tự Động Wikipedia + Gemini AI</h1>
         </div>
     </div>
 
-    <!-- =================================================================
-         SPLIT-SCREEN LAYOUT: LEFT (WIKIPEDIA API) | RIGHT (GEMINI AI)
-         ================================================================= -->
+    <!-- GIAO DIỆN CHIA ĐÔI MÀN HÌNH: TRÁI (WIKIPEDIA) | PHẢI (GEMINI AI) -->
     <div class="admin-split-screen">
 
-        <!-- LEFT HALF: WIKIPEDIA API REFERENCE FETCHING -->
+        <!-- NỬA TRÁI: TRÍCH XUẤT BÀI VIẾT TỪ WIKIPEDIA TIẾNG VIỆT -->
         <div class="bento-card">
-            <h2 style="font-size: 1.3rem; margin-bottom: 0.4rem;">🌐 1. Wikipedia Reference Extractor</h2>
+            <h2 style="font-size: 1.3rem; margin-bottom: 0.4rem;">🌐 1. Trích Xuất Tư Liệu Từ Wikipedia</h2>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">
-                Enter any marine topic (e.g., <em>Coral bleaching</em>, <em>Giant squid</em>, <em>Hydrothermal vent</em>) to pull reference text via Wikipedia API.
+                Nhập chủ đề đại dương bằng Tiếng Việt (VD: <em>Cá voi xanh</em>, <em>Rãnh Mariana</em>, <em>San hô</em>, <em>Cá mập trắng lớn</em>) để lấy văn bản từ Wikipedia.
             </p>
 
             <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
-                <input type="text" id="wikiTopicInput" class="form-control" placeholder="Enter ocean topic (e.g., Great Barrier Reef)..." value="Hydrothermal vent">
+                <input type="text" id="wikiTopicInput" class="form-control" placeholder="Nhập chủ đề (VD: Cá voi xanh)..." value="Cá voi xanh">
                 <button type="button" id="fetchWikiBtn" class="btn btn-primary" style="white-space: nowrap;">
-                    🔍 Fetch Wikipedia
+                    🔍 Lấy Bài Wikipedia
                 </button>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
                 <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">Quiz Set Title</label>
-                    <input type="text" id="quizTitleInput" class="form-control" placeholder="Article Title">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Tiêu Đề Bộ Đề</label>
+                    <input type="text" id="quizTitleInput" class="form-control" placeholder="Tiêu đề bài đọc">
                 </div>
                 <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted);">Ocean Ecological Zone</label>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">Tầng Sinh Thái Đại Dương</label>
                     <select id="oceanZoneSelect" class="form-control">
-                        <option value="Sunlit Zone (0m - 200m)">Sunlit Zone (0m - 200m)</option>
-                        <option value="Twilight Zone (200m - 1,000m)">Twilight Zone (200m - 1,000m)</option>
-                        <option value="Midnight Zone (1,000m - 4,000m)">Midnight Zone (1,000m - 4,000m)</option>
-                        <option value="Abyssal Zone (4,000m - 6,000m)" selected>Abyssal Zone (4,000m - 6,000m)</option>
-                        <option value="Hadalpelagic Zone (6,000m - 11,000m)">Hadalpelagic Zone (6,000m - 11,000m)</option>
+                        <option value="Tầng Ánh Sáng (0m - 200m)">Tầng Ánh Sáng (0m - 200m)</option>
+                        <option value="Tầng Chạng Vạng (200m - 1,000m)">Tầng Chạng Vạng (200m - 1,000m)</option>
+                        <option value="Tầng Nửa Đêm (1,000m - 4,000m)">Tầng Nửa Đêm (1,000m - 4,000m)</option>
+                        <option value="Tầng Đáy Thẳm (4,000m - 6,000m)" selected>Tầng Đáy Thẳm (4,000m - 6,000m)</option>
+                        <option value="Tầng Hố Thẳm (6,000m - 11,000m)">Tầng Hố Thẳm (6,000m - 11,000m)</option>
                     </select>
                 </div>
             </div>
 
             <input type="hidden" id="wikiSourceUrl" value="">
 
-            <label style="font-size: 0.8rem; color: var(--text-muted);">Curated Reading Passage (Editable before AI analysis)</label>
-            <textarea id="wikiPassageTextarea" rows="12" class="form-control" style="margin-top: 0.35rem; line-height: 1.65;" placeholder="Fetched Wikipedia passage will appear here..."></textarea>
+            <label style="font-size: 0.8rem; color: var(--text-muted);">Nội Dung Bài Đọc Tham Khảo (Có thể chỉnh sửa trước khi tạo câu hỏi)</label>
+            <textarea id="wikiPassageTextarea" rows="12" class="form-control" style="margin-top: 0.35rem; line-height: 1.65;" placeholder="Nội dung trích xuất từ Wikipedia sẽ hiển thị tại đây..."></textarea>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.15rem;">
                 <span id="wikiStatusMsg" style="font-size: 0.85rem; color: var(--cyan-glow);"></span>
                 <button type="button" id="generateGeminiBtn" class="btn btn-warning">
-                    ✨ Analyze & Generate Questions with Gemini AI →
+                    ✨ Phân Tích & Tạo Câu Hỏi Bằng Gemini AI →
                 </button>
             </div>
         </div>
 
-        <!-- RIGHT HALF: GEMINI AI GENERATED QUESTIONS (EDIT, DELETE, REGENERATE, SAVE) -->
+        <!-- NỬA PHẢI: CÂU HỎI DO GEMINI AI TẠO (SỬA, XÓA, TẠO LẠI, LƯU) -->
         <div class="bento-card" style="display: flex; flex-direction: column; justify-content: space-between;">
             <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                     <div>
-                        <h2 style="font-size: 1.3rem;">🤖 2. Gemini AI Question Inspector</h2>
-                        <p style="font-size: 0.85rem; color: var(--text-muted);">Review, Edit, Delete, or Regenerate questions before saving to MySQL</p>
+                        <h2 style="font-size: 1.3rem;">🤖 2. Kiểm Duyệt Câu Hỏi Từ Gemini AI</h2>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Xem trước, Chỉnh sửa, Xóa hoặc Tạo lại trước khi lưu vào MySQL</p>
                     </div>
                     <button type="button" id="regenerateAiBtn" class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size: 0.82rem; display: none;">
-                        🔄 Regenerate
+                        🔄 Tạo Lại (Regenerate)
                     </button>
                 </div>
 
                 <div id="aiQuestionsList" style="max-height: 520px; overflow-y: auto; padding-right: 0.4rem;">
                     <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted);">
                         <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">🧠</div>
-                        <p>Fetch a Wikipedia article on the left, then click <strong>"Analyze & Generate Questions with Gemini AI"</strong>.</p>
+                        <p>Hãy lấy một bài viết Wikipedia ở cột bên trái, sau đó bấm nút <strong>"Phân Tích & Tạo Câu Hỏi Bằng Gemini AI"</strong>.</p>
                     </div>
                 </div>
             </div>
 
             <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <button type="button" onclick="addBlankQuestionCard()" class="btn btn-outline" style="font-size: 0.85rem;">
-                    ➕ Add Manual Question
+                    ➕ Thêm Câu Hỏi Thủ Công
                 </button>
                 <button type="button" id="saveQuizPackageBtn" class="btn btn-primary" disabled>
-                    💾 Save Approved Quiz Set to Database
+                    💾 Lưu Bộ Đề Vào Database
                 </button>
             </div>
         </div>
 
     </div>
 
-    <!-- =================================================================
-         TABLE-BASED ADMIN PANEL: EXISTING QUIZ SETS IN DATABASE
-         ================================================================= -->
+    <!-- BẢNG QUẢN LÝ CÁC BỘ ĐỀ ĐANG CÓ TRONG DATABASE -->
     <div class="bento-card">
-        <h2 style="font-size: 1.4rem; margin-bottom: 1rem;">🗄️ Existing Ocean Quiz Sets in MySQL</h2>
+        <h2 style="font-size: 1.4rem; margin-bottom: 1rem;">🗄️ Danh Sách Bộ Đề Trong Cơ Sở Dữ Liệu (MySQL)</h2>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Title & Topic</th>
-                    <th>Ecological Zone</th>
-                    <th>Questions</th>
-                    <th>Total Attempts</th>
-                    <th style="text-align: right;">Actions</th>
+                    <th>Mã Đề</th>
+                    <th>Tiêu Đề & Nguồn</th>
+                    <th>Tầng Sinh Thái</th>
+                    <th>Số Câu Hỏi</th>
+                    <th>Lượt Làm Bài</th>
+                    <th style="text-align: right;">Thao Tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -120,13 +116,13 @@
                             @endif
                         </td>
                         <td>{{ $set->ocean_zone }}</td>
-                        <td><span class="zone-depth-pill">{{ $set->questions_count }} Qs</span></td>
-                        <td>{{ $set->attempts_count }} dives</td>
+                        <td><span class="zone-depth-pill">{{ $set->questions_count }} câu</span></td>
+                        <td>{{ $set->attempts_count }} lượt</td>
                         <td style="text-align: right;">
-                            <form action="{{ route('admin.quiz-sets.destroy', $set) }}" method="POST" onsubmit="return confirm('Delete this Quiz Set and all its questions?');" style="display:inline;">
+                            <form action="{{ route('admin.quiz-sets.destroy', $set) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bộ đề này và toàn bộ câu hỏi bên trong?');" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">🗑️ Delete</button>
+                                <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.85rem; font-size: 0.82rem;">🗑️ Xóa</button>
                             </form>
                         </td>
                     </tr>
@@ -142,13 +138,12 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     let draftQuestions = [];
 
-    // 1. FETCH WIKIPEDIA API
     document.getElementById('fetchWikiBtn').addEventListener('click', async () => {
         const topic = document.getElementById('wikiTopicInput').value.trim();
         const statusMsg = document.getElementById('wikiStatusMsg');
-        if (!topic) return alert('Please enter a topic!');
+        if (!topic) return alert('Vui lòng nhập chủ đề cần tìm!');
 
-        statusMsg.textContent = '⏳ Querying Wikipedia API...';
+        statusMsg.textContent = '⏳ Đang tải dữ liệu từ Wikipedia Tiếng Việt...';
 
         try {
             const res = await fetch("{{ route('admin.wikipedia') }}", {
@@ -163,29 +158,28 @@
 
             const data = await res.json();
             if (!data.success) {
-                statusMsg.textContent = '❌ ' + (data.message || 'Not found');
+                statusMsg.textContent = '❌ ' + (data.message || 'Không tìm thấy bài viết');
                 return;
             }
 
             document.getElementById('quizTitleInput').value = data.title;
             document.getElementById('wikiPassageTextarea').value = data.extract;
             document.getElementById('wikiSourceUrl').value = data.source_url;
-            statusMsg.textContent = '✅ Loaded Wikipedia article: ' + data.title;
+            statusMsg.textContent = '✅ Đã tải bài viết Wikipedia: ' + data.title;
         } catch (err) {
-            statusMsg.textContent = '❌ Failed to contact Wikipedia API.';
+            statusMsg.textContent = '❌ Lỗi kết nối tới Wikipedia API.';
         }
     });
 
-    // 2. GENERATE OR REGENERATE QUESTIONS VIA GEMINI API
     async function triggerGeminiGeneration() {
         const passage = document.getElementById('wikiPassageTextarea').value.trim();
         const statusMsg = document.getElementById('wikiStatusMsg');
 
         if (passage.length < 80) {
-            return alert('Please fetch or enter a reading passage of at least 80 characters first.');
+            return alert('Vui lòng lấy bài viết Wikipedia hoặc nhập văn bản dài tối thiểu 80 ký tự.');
         }
 
-        statusMsg.textContent = '🤖 Gemini AI is analyzing passage and synthesizing questions...';
+        statusMsg.textContent = '🤖 Gemini AI đang đọc văn bản và tạo bộ câu hỏi trắc nghiệm Tiếng Việt...';
         document.getElementById('generateGeminiBtn').disabled = true;
 
         try {
@@ -203,7 +197,7 @@
             document.getElementById('generateGeminiBtn').disabled = false;
 
             if (!data.success) {
-                statusMsg.textContent = '❌ ' + (data.message || 'Generation failed');
+                statusMsg.textContent = '❌ ' + (data.message || 'Lỗi tạo câu hỏi');
                 return;
             }
 
@@ -211,21 +205,20 @@
             renderDraftQuestions();
             document.getElementById('regenerateAiBtn').style.display = 'inline-flex';
             document.getElementById('saveQuizPackageBtn').disabled = false;
-            statusMsg.textContent = data.notice ? `ℹ️ ${data.notice}` : '✅ Gemini AI generated 5 questions!';
+            statusMsg.textContent = data.notice ? `${data.notice}` : '✅ Đã tạo thành công 5 câu hỏi!';
         } catch (err) {
             document.getElementById('generateGeminiBtn').disabled = false;
-            statusMsg.textContent = '❌ Error communicating with AI service.';
+            statusMsg.textContent = '❌ Lỗi giao tiếp với AI.';
         }
     }
 
     document.getElementById('generateGeminiBtn').addEventListener('click', triggerGeminiGeneration);
     document.getElementById('regenerateAiBtn').addEventListener('click', triggerGeminiGeneration);
 
-    // 3. RENDER EDITABLE QUESTION CARDS ON RIGHT SPLIT-SCREEN
     function renderDraftQuestions() {
         const container = document.getElementById('aiQuestionsList');
         if (draftQuestions.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">No questions in draft. Click Add Manual Question or Regenerate.</div>`;
+            container.innerHTML = `<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Chưa có câu hỏi nào. Bấm Thêm Câu Hỏi Thủ Công hoặc Tạo Lại.</div>`;
             document.getElementById('saveQuizPackageBtn').disabled = true;
             return;
         }
@@ -234,9 +227,9 @@
         container.innerHTML = draftQuestions.map((q, qIdx) => `
             <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 1.15rem; margin-bottom: 1rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.6rem;">
-                    <strong style="color: var(--cyan-glow);">Question #${qIdx + 1}</strong>
+                    <strong style="color: var(--cyan-glow);">Câu hỏi #${qIdx + 1} (Tích tròn vào đáp án đúng)</strong>
                     <button type="button" onclick="removeDraftQuestion(${qIdx})" class="btn btn-danger" style="padding: 0.25rem 0.65rem; font-size: 0.75rem;">
-                        ✕ Delete
+                        ✕ Xóa câu này
                     </button>
                 </div>
 
@@ -248,7 +241,7 @@
                     ${[0, 1, 2, 3].map(optIdx => `
                         <div style="display:flex; align-items:center; gap: 0.4rem;">
                             <input type="radio" name="correct_opt_${qIdx}" ${Number(q.correct_option_index) === optIdx ? 'checked' : ''}
-                                onchange="updateDraftField(${qIdx}, 'correct_option_index', ${optIdx})" title="Mark as Correct Answer">
+                                onchange="updateDraftField(${qIdx}, 'correct_option_index', ${optIdx})" title="Chọn làm đáp án đúng">
                             <input type="text" class="form-control" style="padding: 0.45rem 0.65rem; font-size: 0.85rem;"
                                 value="${escapeHtml((q.options && q.options[optIdx]) || '')}"
                                 onchange="updateDraftOption(${qIdx}, ${optIdx}, this.value)">
@@ -257,7 +250,7 @@
                 </div>
 
                 <input type="text" class="form-control" style="font-size: 0.82rem; color: #cbd5e1;"
-                    placeholder="Explanation (optional)"
+                    placeholder="Giải thích đáp án (tùy chọn)"
                     value="${escapeHtml(q.explanation || '')}"
                     onchange="updateDraftField(${qIdx}, 'explanation', this.value)">
             </div>
@@ -279,10 +272,10 @@
 
     function addBlankQuestionCard() {
         draftQuestions.push({
-            question_text: 'New custom ocean question?',
-            options: ['Option A', 'Option B', 'Option C', 'Option D'],
+            question_text: 'Nhập nội dung câu hỏi mới?',
+            options: ['Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D'],
             correct_option_index: 0,
-            explanation: 'Explanation based on passage.'
+            explanation: 'Giải thích dựa trên bài đọc.'
         });
         renderDraftQuestions();
     }
@@ -291,11 +284,10 @@
         return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    // 4. SAVE APPROVED QUIZ SET + QUESTIONS TO MYSQL
     document.getElementById('saveQuizPackageBtn').addEventListener('click', async () => {
         const payload = {
-            title: document.getElementById('quizTitleInput').value.trim() || 'Ocean Expedition Set',
-            topic: document.getElementById('wikiTopicInput').value.trim() || 'Marine Biology',
+            title: document.getElementById('quizTitleInput').value.trim() || 'Bộ Đề Khám Phá Đại Dương',
+            topic: document.getElementById('wikiTopicInput').value.trim() || 'Sinh học biển',
             ocean_zone: document.getElementById('oceanZoneSelect').value,
             reading_passage: document.getElementById('wikiPassageTextarea').value.trim(),
             source_url: document.getElementById('wikiSourceUrl').value.trim(),
@@ -318,10 +310,10 @@
                 alert('✅ ' + data.message);
                 window.location.reload();
             } else {
-                alert('❌ Failed to save: ' + (data.message || 'Validation error'));
+                alert('❌ Lỗi lưu dữ liệu: ' + (data.message || 'Vui lòng kiểm tra lại'));
             }
         } catch (err) {
-            alert('❌ Error saving quiz set to database.');
+            alert('❌ Có lỗi xảy ra khi lưu bộ đề vào MySQL.');
         }
     });
 </script>

@@ -22,7 +22,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Nửa Trái Split-Screen: Gọi Wikipedia API tìm kiếm và trích xuất nội dung bài viết theo chủ đề
+     * Gọi Wikipedia Tiếng Việt (vi.wikipedia.org), nếu không có tự động tìm trên en.wikipedia.org
      */
     public function fetchWikipedia(Request $request)
     {
@@ -33,9 +33,10 @@ class AdminController extends Controller
         $topic = trim($request->input('topic'));
 
         try {
+            $wikiLang = 'vi';
             $searchResp = Http::withoutVerifying()->withHeaders([
                 'User-Agent' => 'AbyssalMindOceanQuiz/1.0 (https://ocean.io; admin@ocean.io)'
-            ])->get('https://en.wikipedia.org/w/api.php', [
+            ])->get("https://{$wikiLang}.wikipedia.org/w/api.php", [
                 'action' => 'query',
                 'list' => 'search',
                 'srsearch' => $topic,
@@ -44,10 +45,26 @@ class AdminController extends Controller
             ]);
 
             $searchData = $searchResp->json();
+
+            // Nếu từ khóa không có trên Wiki Tiếng Việt, tự động tìm trên Wiki Tiếng Anh
+            if (empty($searchData['query']['search'])) {
+                $wikiLang = 'en';
+                $searchResp = Http::withoutVerifying()->withHeaders([
+                    'User-Agent' => 'AbyssalMindOceanQuiz/1.0 (https://ocean.io; admin@ocean.io)'
+                ])->get("https://{$wikiLang}.wikipedia.org/w/api.php", [
+                    'action' => 'query',
+                    'list' => 'search',
+                    'srsearch' => $topic,
+                    'format' => 'json',
+                    'srlimit' => 1,
+                ]);
+                $searchData = $searchResp->json();
+            }
+
             if (empty($searchData['query']['search'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => "No Wikipedia article found for topic: {$topic}",
+                    'message' => "Không tìm thấy bài viết Wikipedia nào cho chủ đề: {$topic}",
                 ], 404);
             }
 
@@ -55,7 +72,7 @@ class AdminController extends Controller
 
             $extractResp = Http::withoutVerifying()->withHeaders([
                 'User-Agent' => 'AbyssalMindOceanQuiz/1.0 (https://ocean.io; admin@ocean.io)'
-            ])->get('https://en.wikipedia.org/w/api.php', [
+            ])->get("https://{$wikiLang}.wikipedia.org/w/api.php", [
                 'action' => 'query',
                 'prop' => 'extracts',
                 'exchars' => 2800,
@@ -69,29 +86,22 @@ class AdminController extends Controller
             $page = reset($pages);
             $extractText = trim($page['extract'] ?? '');
 
-            if (empty($extractText)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Wikipedia article returned empty text.',
-                ], 422);
-            }
-
             return response()->json([
                 'success' => true,
                 'title' => $bestTitle,
-                'source_url' => 'https://en.wikipedia.org/wiki/' . rawurlencode(str_replace(' ', '_', $bestTitle)),
+                'source_url' => "https://{$wikiLang}.wikipedia.org/wiki/" . rawurlencode(str_replace(' ', '_', $bestTitle)),
                 'extract' => $extractText,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Wikipedia API Error: ' . $e->getMessage(),
+                'message' => 'Lỗi Wikipedia API: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Nửa Phải Split-Screen: Gửi văn bản Wikipedia sang Gemini API (Hỗ trợ Gemini 2.5 & 2.0 Flash mới nhất)
+     * Gửi văn bản sang Gemini AI và yêu cầu sinh câu hỏi trắc nghiệm bằng TIẾNG VIỆT
      */
     public function generateGemini(Request $request)
     {
@@ -104,37 +114,33 @@ class AdminController extends Controller
         $count = $request->input('question_count', 5);
         $apiKey = trim((string) env('GEMINI_API_KEY'));
 
-        // Nếu chưa điền GEMINI_API_KEY, dùng bộ phân tích NLP nội bộ
         if (empty($apiKey) || $apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
             return response()->json([
                 'success' => true,
                 'mode' => 'fallback_simulation',
                 'questions' => $this->buildFallbackQuestionsFromPassage($passage, $count),
-                'notice' => 'Generated via built-in NLP analyzer (Add GEMINI_API_KEY in .env for live Gemini AI).',
+                'notice' => 'ℹ️ Đã tạo câu hỏi bằng bộ phân tích nội bộ (Thêm GEMINI_API_KEY vào .env để dùng Gemini AI).',
             ]);
         }
 
         $prompt = <<<PROMPT
-You are an expert marine biology quiz generator. Analyze the following reference text and generate {$count} multiple-choice questions strictly based on the text.
-Return ONLY a valid JSON array (no markdown formatting, no code fences) where each object has:
-- "question_text": string
-- "options": array of exactly 4 strings
-- "correct_option_index": integer (0, 1, 2, or 3)
-- "explanation": short string explaining why the answer is correct based on the text
+Bạn là chuyên gia hải dương học. Hãy phân tích đoạn văn bản tham khảo dưới đây và tạo ra {$count} câu hỏi trắc nghiệm bằng TIẾNG VIỆT bám sát nội dung văn bản.
+Chỉ trả về duy nhất một mảng JSON hợp lệ (không có markdown, không có ```json) trong đó mỗi phần tử gồm:
+- "question_text": chuỗi câu hỏi bằng tiếng Việt
+- "options": mảng gồm đúng 4 chuỗi đáp án bằng tiếng Việt
+- "correct_option_index": số nguyên (0, 1, 2, hoặc 3) chỉ vị trí đáp án đúng
+- "explanation": chuỗi giải thích ngắn gọn bằng tiếng Việt vì sao đáp án đó đúng dựa theo văn bản
 
-Reference Text:
+Văn bản tham khảo:
 {$passage}
 PROMPT;
 
-        // Danh sách các model Gemini mới nhất của Google (Thử lần lượt từ 2.5 xuống 2.0)
         $modelsToTry = [
             'gemini-2.5-flash',
             'gemini-2.0-flash',
             'gemini-2.0-flash-lite',
             'gemini-flash-latest',
         ];
-
-        $lastError = '';
 
         foreach ($modelsToTry as $modelName) {
             try {
@@ -161,29 +167,23 @@ PROMPT;
                             'success' => true,
                             'mode' => 'gemini_live',
                             'questions' => $questions,
-                            'notice' => "✅ Gemini AI ({$modelName}) generated " . count($questions) . " questions!",
+                            'notice' => "✅ Gemini AI ({$modelName}) đã tạo thành công " . count($questions) . " câu hỏi Tiếng Việt!",
                         ]);
                     }
-                } else {
-                    $lastError = $response->body();
                 }
             } catch (\Throwable $e) {
-                $lastError = $e->getMessage();
+                // Thử model tiếp theo
             }
         }
 
-        // Nếu API Key bị sai hoặc hết hạn mức, tự động dùng bộ dự phòng để không làm gián đoạn buổi thuyết trình
         return response()->json([
             'success' => true,
             'mode' => 'fallback_simulation',
             'questions' => $this->buildFallbackQuestionsFromPassage($passage, $count),
-            'notice' => '⚠️ Gemini API fallback activated (Check API Key/Quota). Questions generated from passage.',
+            'notice' => '⚠️ Đã kích hoạt bộ tạo câu hỏi dự phòng từ văn bản.',
         ]);
     }
 
-    /**
-     * Lưu toàn bộ Quiz Set (Bài đọc + Danh sách câu hỏi đã được Admin duyệt/chỉnh sửa) vào MySQL
-     */
     public function storeQuizSet(Request $request)
     {
         $validated = $request->validate([
@@ -226,13 +226,13 @@ PROMPT;
 
             return response()->json([
                 'success' => true,
-                'message' => 'Quiz Set and ' . count($validated['questions']) . ' questions saved to MySQL!',
+                'message' => 'Đã lưu bộ đề cùng ' . count($validated['questions']) . ' câu hỏi vào cơ sở dữ liệu MySQL!',
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Database Save Error: ' . $e->getMessage(),
+                'message' => 'Lỗi lưu Database: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -240,12 +240,9 @@ PROMPT;
     public function destroyQuizSet(QuizSet $quizSet)
     {
         $quizSet->delete();
-        return back()->with('success', 'Quiz Set deleted from database.');
+        return back()->with('success', 'Đã xóa bộ đề khỏi cơ sở dữ liệu.');
     }
 
-    /**
-     * Bộ phân tích câu dự phòng thông minh
-     */
     private function buildFallbackQuestionsFromPassage(string $passage, int $count): array
     {
         $sentences = preg_split('/(?<=[.?!])\s+/', trim($passage), -1, PREG_SPLIT_NO_EMPTY);
@@ -254,15 +251,15 @@ PROMPT;
         for ($i = 0; $i < min($count, max(3, count($sentences))); $i++) {
             $sentence = $sentences[$i] ?? $sentences[0];
             $questions[] = [
-                'question_text' => "According to the scientific passage, which statement accurately reflects key facts (#" . ($i + 1) . ")?",
+                'question_text' => "Theo tư liệu khoa học vừa đọc, nhận định nào sau đây là chính xác (Câu #" . ($i + 1) . ")?",
                 'options' => [
                     mb_substr($sentence, 0, 110) . (mb_strlen($sentence) > 110 ? '...' : ''),
-                    'Sunlight penetrates freely below 5,000 meters to support coral reefs.',
-                    'Water pressure decreases linearly with ocean depth.',
-                    'Marine organisms cannot survive below 100 meters depth.'
+                    'Ánh sáng mặt trời có thể chiếu sáng rực rỡ xuống độ sâu hơn 8.000 mét.',
+                    'Áp suất nước biển giảm dần khi lặn sâu xuống đáy đại dương.',
+                    'Hoàn toàn không có sinh vật nào tồn tại được ở độ sâu quá 200 mét.'
                 ],
                 'correct_option_index' => 0,
-                'explanation' => 'Directly verified from the reference passage: "' . mb_substr($sentence, 0, 140) . '..."',
+                'explanation' => 'Trích xuất trực tiếp từ bài đọc: "' . mb_substr($sentence, 0, 140) . '..."',
             ];
         }
 

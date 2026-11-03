@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'AbyssalMind - Ocean Knowledge Quiz')</title>
+    <title>@yield('title', 'AbyssalMind - Đấu Trường Kiến Thức Đại Dương')</title>
     <link rel="stylesheet" href="{{ asset('css/ocean-app.css') }}">
 </head>
 <body>
@@ -15,21 +15,21 @@
         </a>
 
         <div class="nav-links">
-            <a href="{{ route('welcome') }}" class="nav-link {{ request()->routeIs('welcome') ? 'active' : '' }}">Ocean Depth</a>
-            <a href="{{ route('leaderboard') }}" class="nav-link {{ request()->routeIs('leaderboard') ? 'active' : '' }}">🏆 Leaderboard</a>
+            <a href="{{ route('welcome') }}" class="nav-link {{ request()->routeIs('welcome') ? 'active' : '' }}">Độ Sâu Đại Dương</a>
+            <a href="{{ route('leaderboard') }}" class="nav-link {{ request()->routeIs('leaderboard') ? 'active' : '' }}">🏆 Bảng Xếp Hạng</a>
 
             @auth
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Bảng Điều Khiển</a>
                 @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" style="color:#fbbf24;">⚡ AI Command Center</a>
+                    <a href="{{ route('admin.index') }}" class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}" style="color:#fbbf24;">⚡ Trung Tâm AI (Admin)</a>
                 @endif
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                     @csrf
-                    <button type="submit" class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size:0.85rem;">Logout</button>
+                    <button type="submit" class="btn btn-outline" style="padding: 0.45rem 0.9rem; font-size:0.85rem;">Đăng xuất</button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="nav-link">Login</a>
-                <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size:0.88rem;">Register</a>
+                <a href="{{ route('login') }}" class="nav-link">Đăng nhập</a>
+                <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size:0.88rem;">Đăng ký</a>
             @endauth
         </div>
     </nav>

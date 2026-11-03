@@ -1,25 +1,25 @@
 @extends('layouts.app')
 
-@section('title', 'Global Ocean Leaderboard | AbyssalMind')
+@section('title', 'Bảng Xếp Hạng Toàn Cầu | AbyssalMind')
 
 @section('content')
 <div class="container" style="max-width: 960px;">
     <div class="bento-card">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;">
             <div>
-                <h1 style="font-size: 1.85rem;">🏆 Global Deep-Sea Leaderboard</h1>
-                <p style="color: var(--text-muted); font-size: 0.92rem;">Real-time ranking of top oceanographers sorted by Total Score & Expeditions Completed</p>
+                <h1 style="font-size: 1.85rem;">🏆 Bảng Xếp Hạng Đại Dương Toàn Cầu</h1>
+                <p style="color: var(--text-muted); font-size: 0.92rem;">Xếp hạng các nhà thám hiểm có tổng điểm cao nhất và số bài hoàn thành nhiều nhất</p>
             </div>
-            <a href="{{ route('quiz.play') }}" class="btn btn-primary">🚀 Climb the Ranks</a>
+            <a href="{{ route('quiz.play') }}" class="btn btn-primary">🚀 Thi Đua Điểm Số Ngay</a>
         </div>
 
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Rank</th>
-                    <th>Explorer Name</th>
-                    <th>Quizzes Completed</th>
-                    <th style="text-align: right;">Total Score</th>
+                    <th>Hạng</th>
+                    <th>Tên Nhà Thám Hiểm</th>
+                    <th>Số Bài Đã Hoàn Thành</th>
+                    <th style="text-align: right;">Tổng Điểm</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,13 +36,13 @@
                             <div style="font-weight: 700;">
                                 {{ $leader->name }}
                                 @if(auth()->id() === $leader->id)
-                                    <span class="zone-depth-pill" style="font-size:0.7rem; padding:0.15rem 0.5rem; margin-left:0.4rem;">YOU</span>
+                                    <span class="zone-depth-pill" style="font-size:0.7rem; padding:0.15rem 0.5rem; margin-left:0.4rem;">BẠN</span>
                                 @endif
                             </div>
                         </td>
-                        <td>{{ $leader->quizzes_completed }} dives</td>
+                        <td>{{ $leader->quizzes_completed }} lượt thi</td>
                         <td style="text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 800; color: var(--cyan-glow); font-size: 1.1rem;">
-                            {{ number_format($leader->total_score) }} pts
+                            {{ number_format($leader->total_score) }} điểm
                         </td>
                     </tr>
                 @endforeach

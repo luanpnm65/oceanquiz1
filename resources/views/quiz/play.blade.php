@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Live Quiz Arena: ' . $quizSet->title)
+@section('title', 'Đấu Trường Quiz: ' . $quizSet->title)
 
 @section('content')
 <div class="container">
 
-    <!-- STEP 1: READING PHASE -->
+    <!-- BƯỚC 1: GIAI ĐOẠN ĐỌC HIỂU TƯ LIỆU (3 PHÚT) -->
     <div id="readingPhaseContainer" class="reading-journal-box">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
-                <span class="zone-depth-pill">STEP 1 OF 2 • SCIENTIFIC BRIEFING</span>
+                <span class="zone-depth-pill">BƯỚC 1 / 2 • ĐỌC TƯ LIỆU KHOA HỌC</span>
                 <span style="margin-left: 0.65rem; font-size: 0.85rem; color: var(--text-muted);">🌊 {{ $quizSet->ocean_zone }}</span>
             </div>
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; font-weight: 700; color: var(--cyan-glow);">
@@ -27,20 +27,20 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 1.5rem; margin-top: 1.5rem;">
             <div style="font-size: 0.88rem; color: var(--text-muted);">
-                📌 Contains <strong>{{ $quizSet->questions->count() }} speed-scored questions</strong> based on this passage.
+                📌 Gồm <strong>{{ $quizSet->questions->count() }} câu hỏi tính điểm tốc độ</strong> dựa trên bài đọc này.
             </div>
             <button type="button" id="startQuizEarlyBtn" class="btn btn-primary" style="font-size: 1.05rem; padding: 0.9rem 1.8rem;">
-                ⚡ Start Quiz Early →
+                ⚡ Bắt Đầu Trả Lời Sớm →
             </button>
         </div>
     </div>
 
-    <!-- STEP 2: KAHOOT INTERFACE -->
+    <!-- BƯỚC 2: GIAO DIỆN THI KAHOOT -->
     <div id="kahootPhaseContainer" class="kahoot-arena" style="display: none;">
 
         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(12, 25, 48, 0.85); padding: 1rem 1.5rem; border-radius: 16px; border: 1px solid var(--border-glass);">
             <div style="font-weight: 700;">
-                Question <span id="qCurrentIndex" style="color: var(--cyan-glow);">1</span> of {{ $quizSet->questions->count() }}
+                Câu hỏi <span id="qCurrentIndex" style="color: var(--cyan-glow);">1</span> / {{ $quizSet->questions->count() }}
             </div>
 
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.45rem; font-weight: 800; color: #fbbf24;">
@@ -48,7 +48,7 @@
             </div>
 
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 800; color: #4ade80;">
-                🏆 <span id="liveScoreDisplay">0</span> pts
+                🏆 <span id="liveScoreDisplay">0</span> điểm
             </div>
         </div>
 
@@ -57,7 +57,7 @@
         </div>
 
         <div class="kahoot-question-banner" id="kahootQuestionText">
-            Loading question...
+            Đang tải câu hỏi...
         </div>
 
         <div id="instantFeedbackBanner" style="display: none; padding: 1rem 1.5rem; border-radius: 14px; text-align: center; font-weight: 700; font-size: 1.15rem;"></div>
@@ -65,43 +65,43 @@
         <div class="kahoot-options-grid">
             <button type="button" class="kahoot-btn opt-0" onclick="selectKahootAnswer(0)">
                 <span class="kahoot-shape">▲</span>
-                <span id="optText0">Option A</span>
+                <span id="optText0">Đáp án A</span>
             </button>
             <button type="button" class="kahoot-btn opt-1" onclick="selectKahootAnswer(1)">
                 <span class="kahoot-shape">◆</span>
-                <span id="optText1">Option B</span>
+                <span id="optText1">Đáp án B</span>
             </button>
             <button type="button" class="kahoot-btn opt-2" onclick="selectKahootAnswer(2)">
                 <span class="kahoot-shape">●</span>
-                <span id="optText2">Option C</span>
+                <span id="optText2">Đáp án C</span>
             </button>
             <button type="button" class="kahoot-btn opt-3" onclick="selectKahootAnswer(3)">
                 <span class="kahoot-shape">■</span>
-                <span id="optText3">Option D</span>
+                <span id="optText3">Đáp án D</span>
             </button>
         </div>
     </div>
 
-    <!-- FINAL SUMMARY MODAL -->
+    <!-- MÀN HÌNH TỔNG KẾT ĐIỂM -->
     <div id="quizCompletionBox" class="reading-journal-box" style="display: none; text-align: center;">
         <div style="font-size: 4rem; margin-bottom: 0.5rem;">🏆</div>
-        <h2 style="font-size: 2.2rem;">Expedition Complete!</h2>
-        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Your telemetry has been synchronized with the Global Ocean Leaderboard.</p>
+        <h2 style="font-size: 2.2rem;">Hoàn Thành Chuyến Thám Hiểm!</h2>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Kết quả của bạn đã được lưu và cập nhật lên Bảng Xếp Hạng Toàn Cầu.</p>
 
         <div class="stat-grid-2" style="max-width: 480px; margin: 1.5rem auto;">
             <div class="stat-tile">
-                <div style="font-size: 0.8rem; color: var(--text-muted);">FINAL SCORE</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">ĐIỂM ĐẠT ĐƯỢC</div>
                 <div class="value" id="finalScoreValue">0</div>
             </div>
             <div class="stat-tile">
-                <div style="font-size: 0.8rem; color: var(--text-muted);">ACCURACY</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">SỐ CÂU ĐÚNG</div>
                 <div class="value" id="finalAccuracyValue">0/0</div>
             </div>
         </div>
 
         <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
-            <a href="{{ route('dashboard') }}" class="btn btn-primary">📊 View Detailed Breakdown</a>
-            <a href="{{ route('leaderboard') }}" class="btn btn-outline">🌍 Global Leaderboard</a>
+            <a href="{{ route('dashboard') }}" class="btn btn-primary">📊 Xem Chi Tiết Đúng/Sai</a>
+            <a href="{{ route('leaderboard') }}" class="btn btn-outline">🌍 Bảng Xếp Hạng</a>
         </div>
     </div>
 
@@ -232,12 +232,12 @@
             banner.style.background = 'rgba(34, 197, 94, 0.25)';
             banner.style.border = '1px solid #4ade80';
             banner.style.color = '#4ade80';
-            banner.innerHTML = `✅ CORRECT! +${earnedPoints} Speed Points (${elapsedSeconds.toFixed(1)}s)`;
+            banner.innerHTML = `✅ CHÍNH XÁC! +${earnedPoints} Điểm Tốc Độ (Phản xạ: ${elapsedSeconds.toFixed(1)}s)`;
         } else {
             banner.style.background = 'rgba(239, 68, 68, 0.25)';
             banner.style.border = '1px solid #f87171';
             banner.style.color = '#fca5a5';
-            banner.innerHTML = `❌ ${selectedIndex === null ? "TIME'S UP!" : "INCORRECT!"} Correct Answer: ${q.options[q.correct_option_index]}`;
+            banner.innerHTML = `❌ ${selectedIndex === null ? "HẾT GIỜ!" : "CHƯA CHÍNH XÁC!"} Đáp án đúng là: ${q.options[q.correct_option_index]}`;
         }
 
         recordedAnswers.push({
@@ -274,11 +274,11 @@
 
             const data = await response.json();
             if (data.success) {
-                document.getElementById('finalScoreValue').textContent = data.score.toLocaleString() + ' pts';
+                document.getElementById('finalScoreValue').textContent = data.score.toLocaleString() + ' điểm';
                 document.getElementById('finalAccuracyValue').textContent = `${data.correct_count} / ${data.total_questions}`;
             }
         } catch (err) {
-            console.error('Error submitting quiz:', err);
+            console.error('Lỗi lưu kết quả:', err);
         }
     }
 
