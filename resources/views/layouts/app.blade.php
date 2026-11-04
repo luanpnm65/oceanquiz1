@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'AbyssalMind - Đấu Trường Kiến Thức Đại Dương')</title>
     <link rel="stylesheet" href="{{ asset('css/ocean-app.css') }}">
+    @stack('styles')
 </head>
 <body>
     <nav class="ocean-nav">
