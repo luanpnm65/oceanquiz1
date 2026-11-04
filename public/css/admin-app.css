@@ -460,6 +460,7 @@
     gap: 0.55rem;
     margin: 0;
     padding-left: 1.25rem;
+    list-style: decimal;
     font-size: 0.86rem;
     color: var(--text-muted);
     line-height: 1.65;
@@ -683,6 +684,7 @@
 
 .admin-alert ul {
     margin: 0.35rem 0 0 1.1rem;
+    list-style: disc;
 }
 
 .admin-alert-error {
