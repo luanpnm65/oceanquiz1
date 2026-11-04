@@ -15,11 +15,12 @@
 - `app/Services/WikipediaService.php`, `GeminiService.php`: sử dụng service từ bộ questiongeneration, gọi API có timeout, kiểm tra dữ liệu và che khóa trong lỗi.
 - `app/Http/Controllers/Admin/`: WikipediaController, ArticleController, AiGenerationController, QuestionSetController phụ trách từng bước riêng.
 - `routes/admin-articles.php`, `routes/admin-question-sets.php`: route quản trị mới; `routes/web.php` nạp hai file này.
-- `resources/views/admin/`: trang Wikipedia, bài viết, AI/nhật ký, bộ nháp và các thành phần dùng chung. Tất cả dùng `layouts.app` và các lớp gốc như `bento-card`, `form-control`, `btn`, `data-table`.
+- `public/build/`: bản build Vite (`manifest.json` + `assets/app-8iEkon_a.css`, `assets/app-Buj5iI_6.js`) được khôi phục và **commit vào Git** (dù `.gitignore` đang bỏ qua `/public/build`) để không bị mất khi clone/deploy. `admin/layout.blade.php` nạp lại qua `@vite` và tự bỏ qua nếu chưa có manifest.
+- `resources/views/admin/`: trang Wikipedia, bài viết, AI/nhật ký, bộ nháp và các thành phần dùng chung. Tất cả kế thừa `admin/layout.blade.php` (sidebar Trung tâm AI + vùng nội dung), dùng `public/css/admin-app.css` với cùng biến màu/font của `public/css/ocean-app.css` để đồng bộ giao diện với trang web; các lớp gốc như `form-control`, `btn`, `data-table` vẫn được tái sử dụng.
 - `app/Models/Article.php`, `AiGenerationLog.php`: bài đã lưu và nhật ký AI. QuizSet bổ sung liên kết Article và nguồn tạo.
 - `database/migrations/2026_11_03_000001_add_question_generation.php`: migration bổ sung, không chép đè migration gốc.
 
-Không sửa file CSS, phông chữ, layout gốc. Không mang CSS hoặc layout oceanquiz1 sang dự án này.
+Không sửa CSS hay phông chữ của trang người học: giao diện quản trị chỉ bổ sung `public/css/admin-app.css`. `layouts/app.blade.php` chỉ thêm `@stack('styles')` để nạp stylesheet quản trị. Không mang CSS hoặc layout oceanquiz1 sang dự án này.
 
 ## Dữ liệu và tương thích
 
